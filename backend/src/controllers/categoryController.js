@@ -6,8 +6,23 @@ const { createSlug } = require("../utils/slug");
 const { signLessonAssets } = require("../services/s3Service");
 
 const listCategories = asyncHandler(async (_req, res) => {
-  const categories = await Category.find().sort({ createdAt: -1 });
-  res.json({ categories });
+  const [categories, counts] = await Promise.all([
+    Category.find().sort({ createdAt: -1 }),
+    Lesson.aggregate([
+      { $group: { _id: "$categoryId", lessonCount: { $sum: 1 } } },
+    ]),
+  ]);
+
+  const countsByCategory = new Map(
+    counts.map((item) => [item._id.toString(), item.lessonCount]),
+  );
+
+  res.json({
+    categories: categories.map((category) => ({
+      ...category.toJSON(),
+      lessonCount: countsByCategory.get(category._id.toString()) || 0,
+    })),
+  });
 });
 
 const getCategory = asyncHandler(async (req, res) => {
@@ -20,7 +35,13 @@ const getCategory = asyncHandler(async (req, res) => {
   const lessons = await Lesson.find({ categoryId: category._id }).sort({ createdAt: -1 });
   const signedLessons = await Promise.all(lessons.map((lesson) => signLessonAssets(lesson)));
 
-  res.json({ category, lessons: signedLessons });
+  res.json({
+    category: {
+      ...category.toJSON(),
+      lessonCount: lessons.length,
+    },
+    lessons: signedLessons,
+  });
 });
 
 const createCategory = asyncHandler(async (req, res) => {

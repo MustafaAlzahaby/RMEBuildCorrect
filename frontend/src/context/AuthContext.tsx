@@ -14,31 +14,18 @@ interface AuthState {
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
-const STORAGE_KEY = "rowad_academy_user_v1";
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      /* noop */
-    } finally {
+    authApi.getCurrentUser().then(setUser).finally(() => {
       setLoading(false);
-    }
+    });
   }, []);
 
   const persist = (u: User | null) => {
     setUser(u);
-    try {
-      if (u) localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-      else localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* noop */
-    }
   };
 
   const login = useCallback(async (email: string, password: string) => {

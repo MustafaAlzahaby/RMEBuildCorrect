@@ -70,7 +70,10 @@ const listLessons = asyncHandler(async (req, res) => {
 });
 
 const getLesson = asyncHandler(async (req, res) => {
-  const lesson = await Lesson.findOne({ slug: req.params.slug }).populate("categoryId", "name slug");
+  const query = mongoose.Types.ObjectId.isValid(req.params.slug)
+    ? { _id: req.params.slug }
+    : { slug: req.params.slug };
+  const lesson = await Lesson.findOne(query).populate("categoryId", "name slug");
 
   if (!lesson) {
     throw new AppError("Lesson not found", 404);

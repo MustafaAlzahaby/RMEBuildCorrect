@@ -1,9 +1,6 @@
-// TODO: replace with real API calls under /api/auth
 import type { User } from "@/types";
-import { mockUsers } from "./mock-data";
-
-const delay = <T,>(value: T, ms = 250): Promise<T> =>
-  new Promise((r) => setTimeout(() => r(value), ms));
+import { mapUser } from "./adapters";
+import { apiRequest } from "./client";
 
 export const EMAIL_DOMAIN = "@rowad-rme.com";
 
@@ -15,25 +12,41 @@ export interface LoginInput { email: string; password: string }
 export interface RegisterInput { name: string; email: string; password: string }
 
 export async function login(input: LoginInput): Promise<User> {
-  // TODO: replace with real API call — POST /api/auth/login
   if (!isValidCompanyEmail(input.email)) throw new Error(`Email must end with ${EMAIL_DOMAIN}`);
-  const found = mockUsers.find((u) => u.email.toLowerCase() === input.email.trim().toLowerCase());
-  // Demo helper: if no match, return first regular user
-  return delay(found ?? mockUsers[0]);
+  const data = await apiRequest<{ user: User }>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  return mapUser(data.user);
 }
 
 export async function loginAsAdmin(): Promise<User> {
-  // Demo helper — returns the seeded admin user.
-  return delay(mockUsers.find((u) => u.role === "admin")!);
+  throw new Error("Demo admin login is disabled. Sign in with an admin account.");
 }
 
 export async function register(input: RegisterInput): Promise<{ pendingVerification: true; email: string }> {
-  // TODO: replace with real API call — POST /api/auth/register
   if (!isValidCompanyEmail(input.email)) throw new Error(`Email must end with ${EMAIL_DOMAIN}`);
-  return delay({ pendingVerification: true, email: input.email });
+  await apiRequest<{ user: User }>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  return { pendingVerification: true, email: input.email };
+}
+
+export async function verifyEmail(token: string): Promise<User> {
+  const data = await apiRequest<{ user: User }>(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+  return mapUser(data.user);
+}
+
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const data = await apiRequest<{ user: User }>("/auth/me");
+    return mapUser(data.user);
+  } catch {
+    return null;
+  }
 }
 
 export async function logout(): Promise<void> {
-  // TODO: replace with real API call — POST /api/auth/logout
-  return delay(undefined);
+  await apiRequest<void>("/auth/logout", { method: "POST" });
 }

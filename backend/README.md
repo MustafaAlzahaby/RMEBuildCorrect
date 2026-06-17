@@ -34,3 +34,22 @@ The API runs on `PORT` and exposes routes under `/api`.
 - Lesson uploads use Multer memory storage and stream files to a private S3 bucket.
 - Lesson asset fields store S3 object keys in MongoDB. API reads return fresh one-hour pre-signed URLs for video, images, and PDFs.
 - CORS allows only `FRONTEND_ORIGIN` and includes credentials for cookie auth.
+
+## Create the first admin
+
+After `.env` is configured, run:
+
+PowerShell:
+
+```powershell
+$env:ADMIN_NAME="Admin User"
+$env:ADMIN_EMAIL="admin@rowad-rme.com"
+$env:ADMIN_PASSWORD="change-me-strong"
+npm run create-admin
+```
+
+macOS/Linux:
+
+```bash
+ADMIN_NAME="Admin User" ADMIN_EMAIL="admin@rowad-rme.com" ADMIN_PASSWORD="change-me-strong" npm run create-admin
+```

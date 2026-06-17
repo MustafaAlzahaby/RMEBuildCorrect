@@ -1,38 +1,48 @@
-// TODO: replace with real API call — GET /api/categories
 import type { Category } from "@/types";
-import { mockCategories } from "./mock-data";
+import { mapCategory } from "./adapters";
+import { apiRequest } from "./client";
 
-const delay = <T,>(value: T, ms = 200): Promise<T> =>
-  new Promise((r) => setTimeout(() => r(value), ms));
+type CategoryInput = Omit<Category, "id" | "lessonCount">;
+
+function toCategoryPayload(input: Partial<CategoryInput>) {
+  return {
+    name: input.name,
+    slug: input.slug,
+    description: input.description,
+    thumbnailUrl: input.thumbnail,
+  };
+}
 
 export async function listCategories(): Promise<Category[]> {
-  // TODO: replace with real API call — GET /api/categories
-  return delay(mockCategories);
+  const data = await apiRequest<{ categories: Category[] }>("/categories");
+  return data.categories.map(mapCategory);
 }
 
-export async function getCategory(id: string): Promise<Category | null> {
-  // TODO: replace with real API call — GET /api/categories/:id
-  return delay(mockCategories.find((c) => c.id === id) ?? null);
+export async function getCategory(slug: string): Promise<Category | null> {
+  try {
+    const data = await apiRequest<{ category: Category }>(`/categories/${encodeURIComponent(slug)}`);
+    return mapCategory(data.category);
+  } catch {
+    return null;
+  }
 }
 
-export async function createCategory(input: Omit<Category, "id" | "lessonCount">): Promise<Category> {
-  // TODO: replace with real API call — POST /api/categories
-  const created: Category = { ...input, id: `c_${Date.now()}`, lessonCount: 0 };
-  mockCategories.push(created);
-  return delay(created);
+export async function createCategory(input: CategoryInput): Promise<Category> {
+  const data = await apiRequest<{ category: Category }>("/categories", {
+    method: "POST",
+    body: JSON.stringify(toCategoryPayload(input)),
+  });
+  return mapCategory(data.category);
 }
 
 export async function updateCategory(id: string, patch: Partial<Category>): Promise<Category> {
-  // TODO: replace with real API call — PATCH /api/categories/:id
-  const idx = mockCategories.findIndex((c) => c.id === id);
-  if (idx === -1) throw new Error("Category not found");
-  mockCategories[idx] = { ...mockCategories[idx], ...patch };
-  return delay(mockCategories[idx]);
+  const data = await apiRequest<{ category: Category }>(`/categories/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(toCategoryPayload(patch)),
+  });
+  return mapCategory(data.category);
 }
 
 export async function deleteCategory(id: string): Promise<void> {
-  // TODO: replace with real API call — DELETE /api/categories/:id
-  const idx = mockCategories.findIndex((c) => c.id === id);
-  if (idx !== -1) mockCategories.splice(idx, 1);
-  return delay(undefined);
+  await apiRequest<void>(`/categories/${id}`, { method: "DELETE" });
 }

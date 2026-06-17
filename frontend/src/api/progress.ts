@@ -1,58 +1,41 @@
-// TODO: replace with real API calls under /api/progress
 import type { DashboardSummary } from "@/types";
-import { mockCategories, mockCompletedLessonIds, mockLessons } from "./mock-data";
+import { buildDashboardSummary } from "./adapters";
+import { apiRequest } from "./client";
+import { listLessons } from "./lessons";
 
-const delay = <T,>(value: T, ms = 200): Promise<T> =>
-  new Promise((r) => setTimeout(() => r(value), ms));
+type ProgressResponse = {
+  completedLessons: Array<{
+    lessonId?: string | { id?: string; _id?: string };
+    completedAt?: string;
+  }>;
+};
 
-function getCompleted(userId: string): Set<string> {
-  return new Set(mockCompletedLessonIds[userId] ?? []);
+function lessonIdFromProgress(item: ProgressResponse["completedLessons"][number]) {
+  if (typeof item.lessonId === "string") return item.lessonId;
+  return item.lessonId?.id ?? item.lessonId?._id ?? "";
 }
 
-export async function isLessonComplete(userId: string, lessonId: string): Promise<boolean> {
-  // TODO: replace with real API call — GET /api/progress/:lessonId
-  return delay(getCompleted(userId).has(lessonId));
+async function completedSet(): Promise<Set<string>> {
+  const data = await apiRequest<ProgressResponse>("/progress");
+  return new Set(data.completedLessons.map(lessonIdFromProgress).filter(Boolean));
+}
+
+export async function isLessonComplete(_userId: string, lessonId: string): Promise<boolean> {
+  return (await completedSet()).has(lessonId);
 }
 
 export async function setLessonComplete(
-  userId: string,
+  _userId: string,
   lessonId: string,
   completed: boolean,
 ): Promise<boolean> {
-  // TODO: replace with real API call — PUT /api/progress/:lessonId
-  const list = mockCompletedLessonIds[userId] ?? (mockCompletedLessonIds[userId] = []);
-  const idx = list.indexOf(lessonId);
-  if (completed && idx === -1) list.push(lessonId);
-  if (!completed && idx !== -1) list.splice(idx, 1);
-  return delay(completed);
+  await apiRequest<void>(`/progress/${lessonId}`, {
+    method: completed ? "POST" : "DELETE",
+  });
+  return completed;
 }
 
-export async function getDashboardSummary(userId: string): Promise<DashboardSummary> {
-  // TODO: replace with real API call — GET /api/progress/summary
-  const completed = getCompleted(userId);
-  const total = mockLessons.length;
-  const done = mockLessons.filter((l) => completed.has(l.id)).length;
-
-  const perCategory = mockCategories.map((c) => {
-    const lessonsIn = mockLessons.filter((l) => l.categoryId === c.id);
-    return {
-      categoryId: c.id,
-      categoryName: c.name,
-      total: lessonsIn.length,
-      completed: lessonsIn.filter((l) => completed.has(l.id)).length,
-    };
-  });
-
-  const recentlyCompleted = mockLessons
-    .filter((l) => completed.has(l.id))
-    .slice(0, 5)
-    .map((l) => ({ lesson: l, completedAt: new Date().toISOString() }));
-
-  return delay({
-    overallPercent: total ? Math.round((done / total) * 100) : 0,
-    completedCount: done,
-    totalCount: total,
-    perCategory,
-    recentlyCompleted,
-  });
+export async function getDashboardSummary(_userId: string): Promise<DashboardSummary> {
+  const [lessons, completed] = await Promise.all([listLessons(), completedSet()]);
+  return buildDashboardSummary(lessons, completed);
 }

@@ -5,6 +5,19 @@ const path = require("path");
 const { Readable } = require("stream");
 const { env } = require("../config/env");
 const { s3Client } = require("../config/s3");
+const { AppError } = require("../utils/AppError");
+
+function isS3Configured() {
+  return Boolean(
+    env.AWS_REGION &&
+      env.AWS_ACCESS_KEY_ID &&
+      env.AWS_SECRET_ACCESS_KEY &&
+      env.AWS_S3_BUCKET &&
+      env.AWS_ACCESS_KEY_ID !== "replace-me" &&
+      env.AWS_SECRET_ACCESS_KEY !== "replace-me" &&
+      env.AWS_S3_BUCKET !== "replace-me",
+  );
+}
 
 function extensionFor(file) {
   const originalExtension = path.extname(file.originalname || "");
@@ -17,6 +30,10 @@ function buildObjectKey(folder, file) {
 }
 
 async function uploadFile(file, folder) {
+  if (!isS3Configured()) {
+    throw new AppError("File uploads are not configured yet. Add AWS S3 settings before uploading files.", 503);
+  }
+
   const key = buildObjectKey(folder, file);
 
   await s3Client.send(

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, type FormEvent } from "react";
-import { HardHat, ShieldCheck } from "lucide-react";
+import { HardHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { EMAIL_DOMAIN, isValidCompanyEmail } from "@/api/auth";
 import { toast } from "sonner";
 
 export function LoginPage() {
-  const { login, loginAsAdmin } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,24 +73,6 @@ export function LoginPage() {
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" disabled={loading} className="w-full bg-primary-gradient text-primary-foreground hover:opacity-90">
           {loading ? "Signing in…" : "Sign in"}
-        </Button>
-
-        <div className="relative my-2 text-center text-xs uppercase tracking-widest text-muted-foreground">
-          <span className="bg-card px-2">Demo</span>
-          <div className="absolute inset-x-0 top-1/2 -z-10 h-px bg-border" />
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={async () => {
-            await loginAsAdmin();
-            toast.success("Signed in as admin (demo)");
-            navigate("/admin");
-          }}
-        >
-          <ShieldCheck className="mr-2 h-4 w-4" /> Continue as admin (demo)
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">

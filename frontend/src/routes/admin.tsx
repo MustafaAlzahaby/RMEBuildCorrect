@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { listCategories, createCategory, updateCategory, deleteCategory } from "@/api/categories";
-import { listLessons, createLesson, updateLesson, deleteLesson } from "@/api/lessons";
+import { listLessons, createLesson, updateLesson, deleteLesson, type LessonFormInput } from "@/api/lessons";
 import { listUsers, setUserActive, updateUserRole } from "@/api/users";
 import type { Category, Lesson, User, UserRole } from "@/types";
 import { toast } from "sonner";
@@ -198,7 +198,7 @@ function LessonsAdmin() {
   };
   useEffect(() => { refresh(); }, []);
 
-  const onSubmit = async (data: Omit<Lesson, "id" | "createdAt" | "categoryName">) => {
+  const onSubmit = async (data: LessonFormInput) => {
     if (editing) {
       await updateLesson(editing.id, data);
       toast.success("Lesson updated");
@@ -272,7 +272,7 @@ function LessonForm({
 }: {
   initial: Lesson | null;
   categories: Category[];
-  onSubmit: (data: Omit<Lesson, "id" | "createdAt" | "categoryName">) => void;
+  onSubmit: (data: LessonFormInput) => void;
 }) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [categoryId, setCategoryId] = useState(initial?.categoryId ?? categories[0]?.id ?? "");
@@ -280,6 +280,9 @@ function LessonForm({
   const [instructions, setInstructions] = useState(initial?.instructions ?? "");
   const [bestPractices, setBestPractices] = useState(initial?.bestPractices ?? "");
   const [methodStatement, setMethodStatement] = useState(initial?.methodStatement ?? "");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<FileList | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   return (
     <form
@@ -290,6 +293,9 @@ function LessonForm({
           videoUrl: initial?.videoUrl ?? "",
           images: initial?.images ?? [],
           pdfUrl: initial?.pdfUrl ?? "",
+          videoFile,
+          imageFiles,
+          pdfFile,
         });
       }}
       className="space-y-3"
@@ -330,16 +336,31 @@ function LessonForm({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
           <Label>Video file</Label>
-          <Input type="file" accept="video/*" className="mt-1 bg-surface" />
-          <p className="mt-1 text-[10px] text-muted-foreground">Upload mocked — wired in real API.</p>
+          <Input
+            type="file"
+            accept="video/*"
+            className="mt-1 bg-surface"
+            onChange={(e) => setVideoFile(e.target.files?.[0] ?? null)}
+          />
         </div>
         <div>
           <Label>Image(s)</Label>
-          <Input type="file" accept="image/*" multiple className="mt-1 bg-surface" />
+          <Input
+            type="file"
+            accept="image/*"
+            multiple
+            className="mt-1 bg-surface"
+            onChange={(e) => setImageFiles(e.target.files)}
+          />
         </div>
         <div>
           <Label>PDF</Label>
-          <Input type="file" accept="application/pdf" className="mt-1 bg-surface" />
+          <Input
+            type="file"
+            accept="application/pdf"
+            className="mt-1 bg-surface"
+            onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)}
+          />
         </div>
       </div>
       <DialogFooter>
