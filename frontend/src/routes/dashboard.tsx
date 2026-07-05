@@ -19,10 +19,39 @@ export function DashboardPage() {
 function DashboardContent() {
   const { user } = useAuth();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) getDashboardSummary(user.id).then(setSummary);
+    if (!user) return;
+
+    let cancelled = false;
+    setError(null);
+
+    getDashboardSummary(user.id)
+      .then((data) => {
+        if (!cancelled) setSummary(data);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Unable to load dashboard");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <p className="text-destructive">{error}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Please sign in again. If the problem continues, restart the frontend and backend.
+        </p>
+      </div>
+    );
+  }
 
   if (!user || !summary) {
     return <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading…</div>;
