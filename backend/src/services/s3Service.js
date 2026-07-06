@@ -1,11 +1,14 @@
 const { GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const crypto = require("crypto");
+const fs = require("fs/promises");
 const path = require("path");
 const { Readable } = require("stream");
 const { env } = require("../config/env");
 const { s3Client } = require("../config/s3");
 const { AppError } = require("../utils/AppError");
+
+const localUploadRoot = path.resolve(__dirname, "../../uploads");
 
 function isS3Configured() {
   return Boolean(
@@ -30,11 +33,22 @@ function buildObjectKey(folder, file) {
 }
 
 async function uploadFile(file, folder) {
+  const key = buildObjectKey(folder, file);
+
+  if (env.FILE_STORAGE === "local") {
+    const localPath = path.resolve(localUploadRoot, key);
+    if (!localPath.startsWith(`${localUploadRoot}${path.sep}`)) {
+      throw new AppError("Invalid upload path", 400);
+    }
+
+    await fs.mkdir(path.dirname(localPath), { recursive: true });
+    await fs.writeFile(localPath, file.buffer);
+    return `local/${key.replaceAll("\\", "/")}`;
+  }
+
   if (!isS3Configured()) {
     throw new AppError("File uploads are not configured yet. Add AWS S3 settings before uploading files.", 503);
   }
-
-  const key = buildObjectKey(folder, file);
 
   await s3Client.send(
     new PutObjectCommand({
@@ -51,6 +65,15 @@ async function uploadFile(file, folder) {
 async function getPresignedUrl(key) {
   if (!key) {
     return "";
+  }
+
+  if (key.startsWith("local/")) {
+    const relativePath = key
+      .slice("local/".length)
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/");
+    return `${env.API_BASE_URL.replace(/\/$/, "")}/uploads/${relativePath}`;
   }
 
   const command = new GetObjectCommand({

@@ -21,18 +21,33 @@ export function Navbar() {
 
   const navLinks = (
     <>
-      <NavLink
-        to="/"
-        end
-        onClick={() => setOpen(false)}
-        className={({ isActive }) =>
-          `text-sm font-medium transition-colors ${
-            isActive ? "text-primary" : "text-foreground/80 hover:text-foreground"
-          }`
-        }
-      >
-        Home
-      </NavLink>
+      {!isAuthenticated && (
+        <NavLink
+          to="/"
+          end
+          onClick={() => setOpen(false)}
+          className={({ isActive }) =>
+            `text-sm font-medium transition-colors ${
+              isActive ? "text-primary" : "text-foreground/80 hover:text-foreground"
+            }`
+          }
+        >
+          Home
+        </NavLink>
+      )}
+      {isAuthenticated && (
+        <NavLink
+          to="/dashboard"
+          onClick={() => setOpen(false)}
+          className={({ isActive }) =>
+            `text-sm font-medium transition-colors ${
+              isActive ? "text-primary" : "text-foreground/80 hover:text-foreground"
+            }`
+          }
+        >
+          My Learning
+        </NavLink>
+      )}
       <NavLink
         to="/library"
         onClick={() => setOpen(false)}
@@ -44,19 +59,6 @@ export function Navbar() {
       >
         Library
       </NavLink>
-      {isAuthenticated && (
-        <NavLink
-          to="/dashboard"
-          onClick={() => setOpen(false)}
-          className={({ isActive }) =>
-            `text-sm font-medium transition-colors ${
-              isActive ? "text-primary" : "text-foreground/80 hover:text-foreground"
-            }`
-          }
-        >
-          Dashboard
-        </NavLink>
-      )}
       {isAdmin && (
         <NavLink
           to="/admin"
@@ -76,7 +78,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-sidebar/95 backdrop-blur supports-[backdrop-filter]:bg-sidebar/80">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary-gradient shadow-red-glow">
             <HardHat className="h-5 w-5 text-primary-foreground" />
           </div>
@@ -114,7 +116,7 @@ export function Navbar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                  <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                  <LayoutDashboard className="mr-2 h-4 w-4" /> My Learning
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate("/admin")}>

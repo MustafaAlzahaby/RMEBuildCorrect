@@ -52,7 +52,9 @@ export function LessonPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Home</Link>
+        <Link to={isAuthenticated ? "/dashboard" : "/"} className="hover:text-foreground">
+          {isAuthenticated ? "My Learning" : "Home"}
+        </Link>
         <ChevronRight className="h-3 w-3" />
         <Link to="/library" className="hover:text-foreground">Library</Link>
         <ChevronRight className="h-3 w-3" />

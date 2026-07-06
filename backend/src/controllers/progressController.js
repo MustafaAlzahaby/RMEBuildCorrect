@@ -1,4 +1,4 @@
-const Category = require("../models/Category");
+ const Category = require("../models/Category");
 const Lesson = require("../models/Lesson");
 const LessonProgress = require("../models/LessonProgress");
 const { AppError } = require("../utils/AppError");

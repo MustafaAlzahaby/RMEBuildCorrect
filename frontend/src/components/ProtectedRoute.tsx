@@ -21,3 +21,18 @@ export function ProtectedRoute({
   if (requireAdmin && !isAdmin) return <Navigate to="/dashboard" />;
   return <>{children}</>;
 }
+
+export function GuestOnlyRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">
+        Loading...
+      </div>
+    );
+  }
+
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}

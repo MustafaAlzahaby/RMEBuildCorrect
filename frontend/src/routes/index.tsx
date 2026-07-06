@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowRight, BookOpen, ShieldCheck, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,11 @@ import { CategoryCard } from "@/components/CategoryCard";
 import { LessonCard } from "@/components/LessonCard";
 import { listCategories } from "@/api/categories";
 import { recentLessons } from "@/api/lessons";
+import { useAuth } from "@/context/AuthContext";
 import type { Category, Lesson } from "@/types";
 
 export function HomePage() {
+  const { isAuthenticated, loading } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [recents, setRecents] = useState<Lesson[]>([]);
 
@@ -16,6 +18,14 @@ export function HomePage() {
     listCategories().then(setCategories);
     recentLessons(4).then(setRecents);
   }, []);
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading...</div>;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div>

@@ -12,10 +12,15 @@ const baseRequired = [
 ];
 
 const emailDelivery = process.env.EMAIL_DELIVERY || "log";
+const fileStorage = process.env.FILE_STORAGE || "s3";
 const required = [...baseRequired];
 
 if (emailDelivery === "smtp") {
   required.push("SMTP_HOST", "SMTP_USER", "SMTP_PASS");
+}
+
+if (!["local", "s3"].includes(fileStorage)) {
+  throw new Error("FILE_STORAGE must be either local or s3");
 }
 
 const missing = required.filter((key) => !process.env[key]);
@@ -35,6 +40,7 @@ const env = {
   JWT_COOKIE_NAME: process.env.JWT_COOKIE_NAME || "academy_token",
   EMAIL_VERIFICATION_SECRET: process.env.EMAIL_VERIFICATION_SECRET,
   EMAIL_VERIFICATION_EXPIRES_IN: process.env.EMAIL_VERIFICATION_EXPIRES_IN || "1d",
+  FILE_STORAGE: fileStorage,
   AWS_REGION: process.env.AWS_REGION || "",
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || "",
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || "",

@@ -14,6 +14,7 @@ import { VerifyEmailPage } from "@/routes/verify-email";
 import { AuthProvider } from "@/context/AuthContext";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { GuestOnlyRoute } from "@/components/ProtectedRoute";
 import { Toaster } from "@/components/ui/sonner";
 import { reportLovableError } from "@/lib/lovable-error-reporting";
 
@@ -102,8 +103,8 @@ function App() {
               <Route path="/lessons/:id" element={<LessonPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/admin" element={<AdminPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<GuestOnlyRoute><LoginPage /></GuestOnlyRoute>} />
+              <Route path="/register" element={<GuestOnlyRoute><RegisterPage /></GuestOnlyRoute>} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

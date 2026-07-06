@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { FolderKanban, GraduationCap, Pencil, Plus, Shield, Trash2, Users } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { FolderKanban, GraduationCap, Pencil, Plus, Shield, Trash2, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -272,7 +272,7 @@ function LessonForm({
 }: {
   initial: Lesson | null;
   categories: Category[];
-  onSubmit: (data: LessonFormInput) => void;
+  onSubmit: (data: LessonFormInput) => Promise<void>;
 }) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [categoryId, setCategoryId] = useState(initial?.categoryId ?? categories[0]?.id ?? "");
@@ -281,23 +281,57 @@ function LessonForm({
   const [bestPractices, setBestPractices] = useState(initial?.bestPractices ?? "");
   const [methodStatement, setMethodStatement] = useState(initial?.methodStatement ?? "");
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [imageFiles, setImageFiles] = useState<FileList | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!categoryId && categories.length > 0) {
+      setCategoryId(categories[0].id);
+    }
+  }, [categories, categoryId]);
+
+  const submitLesson = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!categoryId) {
+      setError("Choose a category before saving the lesson.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await onSubmit({
+        title,
+        categoryId,
+        description,
+        instructions,
+        bestPractices,
+        methodStatement,
+        videoUrl: initial?.videoUrl ?? "",
+        images: initial?.images ?? [],
+        pdfUrl: initial?.pdfUrl ?? "",
+        videoFile,
+        imageFiles,
+        pdfFile,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unable to save lesson";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <form
-      onSubmit={(e: FormEvent) => {
-        e.preventDefault();
-        onSubmit({
-          title, categoryId, description, instructions, bestPractices, methodStatement,
-          videoUrl: initial?.videoUrl ?? "",
-          images: initial?.images ?? [],
-          pdfUrl: initial?.pdfUrl ?? "",
-          videoFile,
-          imageFiles,
-          pdfFile,
-        });
-      }}
+      onSubmit={submitLesson}
       className="space-y-3"
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -308,13 +342,18 @@ function LessonForm({
         <div>
           <Label>Category</Label>
           <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger className="mt-1 bg-surface"><SelectValue placeholder="Choose" /></SelectTrigger>
+            <SelectTrigger className="mt-1 bg-surface" disabled={categories.length === 0}>
+              <SelectValue placeholder="Choose a category" />
+            </SelectTrigger>
             <SelectContent>
               {categories.map((c) => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
+          {categories.length === 0 && (
+            <p className="mt-1 text-xs text-destructive">No categories are available.</p>
+          )}
         </div>
       </div>
       <div>
@@ -337,37 +376,112 @@ function LessonForm({
         <div>
           <Label>Video file</Label>
           <Input
+            ref={videoInputRef}
             type="file"
             accept="video/*"
             className="mt-1 bg-surface"
-            onChange={(e) => setVideoFile(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              setVideoFile(e.target.files?.[0] ?? null);
+              e.currentTarget.value = "";
+            }}
           />
+          {videoFile && (
+            <SelectedFile
+              file={videoFile}
+              onRemove={() => {
+                setVideoFile(null);
+                if (videoInputRef.current) videoInputRef.current.value = "";
+              }}
+            />
+          )}
         </div>
         <div>
           <Label>Image(s)</Label>
           <Input
+            ref={imageInputRef}
             type="file"
             accept="image/*"
             multiple
             className="mt-1 bg-surface"
-            onChange={(e) => setImageFiles(e.target.files)}
+            onChange={(e) => {
+              const selected = Array.from(e.target.files ?? []);
+              setImageFiles((current) => [...current, ...selected]);
+              e.currentTarget.value = "";
+            }}
           />
+          {imageFiles.map((file, index) => (
+            <SelectedFile
+              key={`${file.name}-${file.lastModified}-${index}`}
+              file={file}
+              onRemove={() => {
+                setImageFiles((current) => current.filter((_, itemIndex) => itemIndex !== index));
+                if (imageInputRef.current) imageInputRef.current.value = "";
+              }}
+            />
+          ))}
         </div>
         <div>
           <Label>PDF</Label>
           <Input
+            ref={pdfInputRef}
             type="file"
             accept="application/pdf"
             className="mt-1 bg-surface"
-            onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              setPdfFile(e.target.files?.[0] ?? null);
+              e.currentTarget.value = "";
+            }}
           />
+          {pdfFile && (
+            <SelectedFile
+              file={pdfFile}
+              onRemove={() => {
+                setPdfFile(null);
+                if (pdfInputRef.current) pdfInputRef.current.value = "";
+              }}
+            />
+          )}
         </div>
       </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <DialogFooter>
-        <Button type="submit" className="bg-primary-gradient text-primary-foreground">Save</Button>
+        <Button
+          type="submit"
+          disabled={saving || categories.length === 0}
+          className="bg-primary-gradient text-primary-foreground"
+        >
+          {saving ? "Saving..." : "Save"}
+        </Button>
       </DialogFooter>
     </form>
   );
+}
+
+function SelectedFile({ file, onRemove }: { file: File; onRemove: () => void }) {
+  return (
+    <div className="mt-2 flex min-w-0 items-center gap-2 border-l-2 border-primary/60 pl-2 text-xs">
+      <span className="min-w-0 flex-1 truncate text-foreground" title={file.name}>
+        {file.name}
+      </span>
+      <span className="shrink-0 text-muted-foreground">{formatFileSize(file.size)}</span>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0"
+        onClick={onRemove}
+        aria-label={`Remove ${file.name}`}
+        title="Remove selected file"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 /* ----------------------- Users ----------------------- */
