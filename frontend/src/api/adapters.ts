@@ -1,4 +1,4 @@
-import type { Category, DashboardSummary, Lesson, LessonAsset, User } from "@/types";
+import type { Category, Lesson, LessonAsset, User } from "@/types";
 
 type ApiCategory = {
   id: string;
@@ -95,40 +95,5 @@ export function mapLesson(lesson: ApiLesson): Lesson {
     bestPractices: lesson.bestPractices ?? "",
     methodStatement: lesson.methodStatement ?? "",
     createdAt: lesson.createdAt ?? "",
-  };
-}
-
-export function buildDashboardSummary(
-  lessons: Lesson[],
-  completedLessonIds: Set<string>,
-): DashboardSummary {
-  const completedLessons = lessons.filter((lesson) => completedLessonIds.has(lesson.id));
-  const categories = new Map<string, { categoryName: string; completed: number; total: number }>();
-
-  lessons.forEach((lesson) => {
-    const current = categories.get(lesson.categoryId) ?? {
-      categoryName: lesson.categoryName,
-      completed: 0,
-      total: 0,
-    };
-    current.total += 1;
-    if (completedLessonIds.has(lesson.id)) current.completed += 1;
-    categories.set(lesson.categoryId, current);
-  });
-
-  return {
-    overallPercent: lessons.length ? Math.round((completedLessons.length / lessons.length) * 100) : 0,
-    completedCount: completedLessons.length,
-    totalCount: lessons.length,
-    perCategory: Array.from(categories.entries()).map(([categoryId, value]) => ({
-      categoryId,
-      categoryName: value.categoryName,
-      completed: value.completed,
-      total: value.total,
-    })),
-    recentlyCompleted: completedLessons.slice(0, 5).map((lesson) => ({
-      lesson,
-      completedAt: new Date().toISOString(),
-    })),
   };
 }

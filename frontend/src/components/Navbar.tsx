@@ -45,7 +45,7 @@ export function Navbar() {
             }`
           }
         >
-          My Learning
+          My Guide
         </NavLink>
       )}
       <NavLink
@@ -87,7 +87,7 @@ export function Navbar() {
               Rowad
             </span>
             <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-primary">
-              Academy
+              Field Guide
             </span>
           </div>
         </Link>
@@ -116,7 +116,7 @@ export function Navbar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                  <LayoutDashboard className="mr-2 h-4 w-4" /> My Learning
+                  <LayoutDashboard className="mr-2 h-4 w-4" /> My Guide
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate("/admin")}>

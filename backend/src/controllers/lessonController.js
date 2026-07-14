@@ -76,7 +76,7 @@ const getLesson = asyncHandler(async (req, res) => {
   const lesson = await Lesson.findOne(query).populate("categoryId", "name slug");
 
   if (!lesson) {
-    throw new AppError("Lesson not found", 404);
+    throw new AppError("Guide not found", 404);
   }
 
   res.json({ lesson: await signLessonAssets(lesson) });
@@ -119,7 +119,7 @@ const updateLesson = asyncHandler(async (req, res) => {
   });
 
   if (!lesson) {
-    throw new AppError("Lesson not found", 404);
+    throw new AppError("Guide not found", 404);
   }
 
   res.json({ lesson: await signLessonAssets(lesson) });
@@ -129,7 +129,7 @@ const deleteLesson = asyncHandler(async (req, res) => {
   const lesson = await Lesson.findByIdAndDelete(req.params.id);
 
   if (!lesson) {
-    throw new AppError("Lesson not found", 404);
+    throw new AppError("Guide not found", 404);
   }
 
   await LessonProgress.deleteMany({ lessonId: lesson._id });

@@ -12,6 +12,14 @@ const {
 } = require("../utils/jwt");
 const { sendVerificationEmail } = require("../services/emailService");
 
+const RESEND_MESSAGE =
+  "If an unverified account exists for that email, a new verification link has been sent.";
+
+async function deliverVerificationEmail(user) {
+  const verificationToken = signEmailVerificationToken(user);
+  await sendVerificationEmail(user, verificationToken);
+}
+
 const register = asyncHandler(async (req, res) => {
   const { name, password } = req.body;
   const email = normalizeEmail(req.body.email);
@@ -22,7 +30,12 @@ const register = asyncHandler(async (req, res) => {
 
   const existing = await User.findOne({ email });
   if (existing) {
-    throw new AppError("An account with this email already exists", 409);
+    throw new AppError(
+      existing.isVerified
+        ? "An account with this email already exists"
+        : "This account is waiting for email verification. Sign in to request a new link.",
+      409,
+    );
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
@@ -32,10 +45,16 @@ const register = asyncHandler(async (req, res) => {
     passwordHash,
     role: "user",
     isVerified: false,
+    emailVerificationSentAt: new Date(),
   });
 
-  const verificationToken = signEmailVerificationToken(user);
-  await sendVerificationEmail(user, verificationToken);
+  try {
+    await deliverVerificationEmail(user);
+  } catch (error) {
+    await User.deleteOne({ _id: user._id, isVerified: false });
+    console.error("Failed to send registration verification email", error);
+    throw new AppError("We could not send the verification email. Please try again shortly.", 503);
+  }
 
   res.status(201).json({
     message: "Registration successful. Please check your email to verify your account.",
@@ -61,17 +80,72 @@ const verifyEmail = asyncHandler(async (req, res) => {
     throw new AppError("Invalid verification token", 400);
   }
 
-  const user = await User.findByIdAndUpdate(
-    decoded.sub,
-    { isVerified: true },
-    { new: true },
-  );
+  const user = await User.findById(decoded.sub).select("+emailVerificationVersion");
 
   if (!user) {
     throw new AppError("User not found", 404);
   }
 
+  if (user.isVerified) {
+    return res.json({ message: "Email already verified", user });
+  }
+
+  if (
+    decoded.email !== user.email ||
+    decoded.version !== user.emailVerificationVersion
+  ) {
+    throw new AppError("This verification link is no longer valid. Request a new one.", 400);
+  }
+
+  user.isVerified = true;
+  user.emailVerificationVersion += 1;
+  user.emailVerificationSentAt = null;
+  await user.save();
+
   res.json({ message: "Email verified successfully", user });
+});
+
+const resendVerification = asyncHandler(async (req, res) => {
+  const email = normalizeEmail(req.body.email);
+
+  if (!isCompanyEmail(email)) {
+    throw new AppError("Use your @rowad-rme.com work email", 400);
+  }
+
+  const user = await User.findOne({ email }).select(
+    "+emailVerificationVersion +emailVerificationSentAt",
+  );
+
+  if (!user || user.isVerified) {
+    return res.json({ message: RESEND_MESSAGE });
+  }
+
+  const cooldownMs = env.EMAIL_RESEND_COOLDOWN_SECONDS * 1000;
+  const elapsedMs = user.emailVerificationSentAt
+    ? Date.now() - user.emailVerificationSentAt.getTime()
+    : cooldownMs;
+
+  if (elapsedMs < cooldownMs) {
+    return res.json({
+      message: RESEND_MESSAGE,
+      retryAfterSeconds: Math.ceil((cooldownMs - elapsedMs) / 1000),
+    });
+  }
+
+  user.emailVerificationVersion += 1;
+  user.emailVerificationSentAt = new Date();
+  await user.save();
+
+  try {
+    await deliverVerificationEmail(user);
+  } catch (error) {
+    user.emailVerificationSentAt = null;
+    await user.save();
+    console.error("Failed to resend verification email", error);
+    throw new AppError("We could not send the verification email. Please try again shortly.", 503);
+  }
+
+  res.json({ message: RESEND_MESSAGE });
 });
 
 const login = asyncHandler(async (req, res) => {
@@ -110,4 +184,4 @@ const me = (req, res) => {
   res.json({ user: req.user });
 };
 
-module.exports = { login, logout, me, register, verifyEmail };
+module.exports = { login, logout, me, register, resendVerification, verifyEmail };

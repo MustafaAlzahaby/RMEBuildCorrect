@@ -1,48 +1,47 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Check, CheckCircle2, ChevronRight, FileText, Image as ImageIcon, ListChecks, PlayCircle, ScrollText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronRight, FileText, Image as ImageIcon, ListChecks, PlayCircle, ScrollText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLesson } from "@/api/lessons";
-import { isLessonComplete, setLessonComplete } from "@/api/progress";
+import { recordGuideView } from "@/api/progress";
 import { useAuth } from "@/context/AuthContext";
 import type { Lesson } from "@/types";
-import { toast } from "sonner";
 
 export function LessonPage() {
   const { id = "" } = useParams();
   const { isAuthenticated, user } = useAuth();
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [done, setDone] = useState(false);
+  const [lessonResult, setLessonResult] = useState<{
+    id: string;
+    lesson: Lesson | null;
+  } | null>(null);
+  const lesson = lessonResult?.id === id ? lessonResult.lesson : null;
+  const loading = lessonResult?.id !== id;
 
   useEffect(() => {
-    setLoading(true);
+    let ignore = false;
+
     getLesson(id).then((l) => {
-      setLesson(l);
-      setLoading(false);
+      if (!ignore) setLessonResult({ id, lesson: l });
     });
+
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   useEffect(() => {
-    if (user) isLessonComplete(user.id, id).then(setDone);
-  }, [user, id]);
-
-  const toggleComplete = async () => {
-    if (!user) return;
-    const next = !done;
-    setDone(next);
-    await setLessonComplete(user.id, id, next);
-    toast.success(next ? "Marked as complete" : "Marked as incomplete");
-  };
+    if (user && lesson?.id === id) {
+      recordGuideView(id).catch(() => undefined);
+    }
+  }, [user, lesson, id]);
 
   if (loading) {
-    return <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading lesson…</div>;
+    return <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading guide…</div>;
   }
   if (!lesson) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <h1 className="font-display text-2xl uppercase tracking-wide">Lesson not found</h1>
+        <h1 className="font-display text-2xl uppercase tracking-wide">Guide not found</h1>
         <Link to="/library" className="mt-4 inline-block text-primary hover:underline">← Back to library</Link>
       </div>
     );
@@ -53,7 +52,7 @@ export function LessonPage() {
       {/* Breadcrumb */}
       <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
         <Link to={isAuthenticated ? "/dashboard" : "/"} className="hover:text-foreground">
-          {isAuthenticated ? "My Learning" : "Home"}
+          {isAuthenticated ? "My Guide" : "Home"}
         </Link>
         <ChevronRight className="h-3 w-3" />
         <Link to="/library" className="hover:text-foreground">Library</Link>
@@ -75,18 +74,6 @@ export function LessonPage() {
           </h1>
           <p className="mt-2 max-w-3xl text-muted-foreground">{lesson.description}</p>
         </div>
-        {isAuthenticated && (
-          <Button
-            onClick={toggleComplete}
-            className={
-              done
-                ? "bg-emerald-600 text-white hover:bg-emerald-600/90"
-                : "bg-primary-gradient text-primary-foreground hover:opacity-90"
-            }
-          >
-            {done ? (<><CheckCircle2 className="mr-2 h-4 w-4" /> Completed</>) : (<><Check className="mr-2 h-4 w-4" /> Mark as Complete</>)}
-          </Button>
-        )}
       </div>
 
       <Tabs defaultValue="video" className="mt-8">
@@ -123,7 +110,7 @@ export function LessonPage() {
 
         <TabsContent value="pdf" className="mt-4">
           {lesson.pdfUrl ? (
-            <iframe src={lesson.pdfUrl} title="Lesson PDF" className="h-[75vh] w-full rounded-lg border border-border bg-card" />
+            <iframe src={lesson.pdfUrl} title="Guide PDF" className="h-[75vh] w-full rounded-lg border border-border bg-card" />
           ) : (
             <p className="text-muted-foreground">No PDF attached.</p>
           )}

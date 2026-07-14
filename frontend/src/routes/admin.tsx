@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { FolderKanban, GraduationCap, Pencil, Plus, Shield, Trash2, Users, X } from "lucide-react";
+import { BookOpen, FolderKanban, Pencil, Plus, Shield, Trash2, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +35,7 @@ function AdminContent() {
         </div>
         <div>
           <h1 className="font-display text-2xl font-bold uppercase tracking-wide">Admin Panel</h1>
-          <p className="text-sm text-muted-foreground">Manage categories, lessons and users.</p>
+          <p className="text-sm text-muted-foreground">Manage categories, guides and users.</p>
         </div>
       </header>
 
@@ -45,7 +45,7 @@ function AdminContent() {
             <FolderKanban className="h-4 w-4" /> Categories
           </TabsTrigger>
           <TabsTrigger value="lessons" className="justify-start gap-2">
-            <GraduationCap className="h-4 w-4" /> Lessons
+            <BookOpen className="h-4 w-4" /> Guides
           </TabsTrigger>
           <TabsTrigger value="users" className="justify-start gap-2">
             <Users className="h-4 w-4" /> Users
@@ -106,7 +106,7 @@ function CategoriesAdmin() {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead className="hidden md:table-cell">Description</TableHead>
-            <TableHead>Lessons</TableHead>
+            <TableHead>Guides</TableHead>
             <TableHead className="w-24 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -201,10 +201,10 @@ function LessonsAdmin() {
   const onSubmit = async (data: LessonFormInput) => {
     if (editing) {
       await updateLesson(editing.id, data);
-      toast.success("Lesson updated");
+      toast.success("Guide updated");
     } else {
       await createLesson(data);
-      toast.success("Lesson created");
+      toast.success("Guide created");
     }
     setOpen(false);
     setEditing(null);
@@ -214,14 +214,14 @@ function LessonsAdmin() {
   return (
     <div className="rounded-lg border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border p-4">
-        <h2 className="font-display text-lg uppercase tracking-wide">Lessons</h2>
+        <h2 className="font-display text-lg uppercase tracking-wide">Guides</h2>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
           <DialogTrigger asChild>
             <Button className="bg-primary-gradient text-primary-foreground"><Plus className="mr-1 h-4 w-4" /> New</Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editing ? "Edit lesson" : "New lesson"}</DialogTitle>
+              <DialogTitle>{editing ? "Edit guide" : "New guide"}</DialogTitle>
             </DialogHeader>
             <LessonForm initial={editing} categories={categories} onSubmit={onSubmit} />
           </DialogContent>
@@ -300,7 +300,7 @@ function LessonForm({
     setError(null);
 
     if (!categoryId) {
-      setError("Choose a category before saving the lesson.");
+      setError("Choose a category before saving the guide.");
       return;
     }
 
@@ -321,7 +321,7 @@ function LessonForm({
         pdfFile,
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unable to save lesson";
+      const message = err instanceof Error ? err.message : "Unable to save guide";
       setError(message);
       toast.error(message);
     } finally {

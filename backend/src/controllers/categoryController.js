@@ -78,7 +78,7 @@ const updateCategory = asyncHandler(async (req, res) => {
 const deleteCategory = asyncHandler(async (req, res) => {
   const hasLessons = await Lesson.exists({ categoryId: req.params.id });
   if (hasLessons) {
-    throw new AppError("Cannot delete a category that still has lessons", 409);
+    throw new AppError("Cannot delete a category that still has guides", 409);
   }
 
   const category = await Category.findByIdAndDelete(req.params.id);

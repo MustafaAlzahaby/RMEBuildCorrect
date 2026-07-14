@@ -27,6 +27,16 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    emailVerificationVersion: {
+      type: Number,
+      default: 1,
+      select: false,
+    },
+    emailVerificationSentAt: {
+      type: Date,
+      default: null,
+      select: false,
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -40,6 +50,8 @@ const userSchema = new mongoose.Schema(
         delete ret._id;
         delete ret.__v;
         delete ret.passwordHash;
+        delete ret.emailVerificationVersion;
+        delete ret.emailVerificationSentAt;
         return ret;
       },
     },

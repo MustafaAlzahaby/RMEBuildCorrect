@@ -22,7 +22,10 @@ export function RegisterPage() {
     setError(null);
     if (name.trim().length < 2) return setError("Please enter your full name.");
     if (!isValidCompanyEmail(email)) return setError(`Email must end with ${EMAIL_DOMAIN}`);
-    if (password.length < 8) return setError("Password must be at least 8 characters.");
+    if (password.length < 10) return setError("Password must be at least 10 characters.");
+    if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return setError("Password must include uppercase, lowercase, and a number.");
+    }
     if (password !== confirm) return setError("Passwords do not match.");
 
     setLoading(true);
@@ -49,7 +52,7 @@ export function RegisterPage() {
       <form onSubmit={onSubmit} className="space-y-4 rounded-lg border border-border bg-card p-6">
         <div>
           <Label htmlFor="name">Full name</Label>
-          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 bg-surface" required />
+          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 bg-surface" autoComplete="name" maxLength={100} required />
         </div>
         <div>
           <Label htmlFor="email">Work email</Label>
@@ -60,17 +63,21 @@ export function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="mt-1 bg-surface"
+            autoComplete="email"
             required
           />
           <p className="mt-1 text-xs text-muted-foreground">Only {EMAIL_DOMAIN} addresses can register.</p>
         </div>
         <div>
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 bg-surface" required />
+          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 bg-surface" autoComplete="new-password" minLength={10} maxLength={128} required />
+          <p className="mt-1 text-xs text-muted-foreground">
+            At least 10 characters with uppercase, lowercase, and a number.
+          </p>
         </div>
         <div>
           <Label htmlFor="confirm">Confirm password</Label>
-          <Input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="mt-1 bg-surface" required />
+          <Input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="mt-1 bg-surface" autoComplete="new-password" minLength={10} maxLength={128} required />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" disabled={loading} className="w-full bg-primary-gradient text-primary-foreground hover:opacity-90">

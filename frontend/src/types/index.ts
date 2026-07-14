@@ -43,24 +43,7 @@ export interface Lesson {
   createdAt: string;
 }
 
-export interface LessonProgress {
-  lessonId: string;
-  userId: string;
-  completed: boolean;
-  completedAt?: string;
-}
-
-export interface CategoryProgress {
-  categoryId: string;
-  categoryName: string;
-  completed: number;
-  total: number;
-}
-
-export interface DashboardSummary {
-  overallPercent: number;
-  completedCount: number;
-  totalCount: number;
-  perCategory: CategoryProgress[];
-  recentlyCompleted: Array<{ lesson: Lesson; completedAt: string }>;
+export interface ViewHistoryEntry {
+  guideId: string;
+  viewedAt: string;
 }

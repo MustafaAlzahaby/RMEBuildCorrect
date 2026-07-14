@@ -3,7 +3,9 @@ function normalizeEmail(email) {
 }
 
 function isCompanyEmail(email) {
-  return normalizeEmail(email).endsWith("@rowad-rme.com");
+  const normalized = normalizeEmail(email);
+  const parts = normalized.split("@");
+  return parts.length === 2 && parts[0].length > 0 && parts[1] === "rowad-rme.com";
 }
 
 module.exports = { isCompanyEmail, normalizeEmail };

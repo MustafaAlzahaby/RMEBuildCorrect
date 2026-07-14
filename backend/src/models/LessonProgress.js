@@ -14,6 +14,9 @@ const lessonProgressSchema = new mongoose.Schema(
     },
     completedAt: {
       type: Date,
+    },
+    viewedAt: {
+      type: Date,
       default: Date.now,
     },
   },
@@ -31,5 +34,6 @@ const lessonProgressSchema = new mongoose.Schema(
 );
 
 lessonProgressSchema.index({ userId: 1, lessonId: 1 }, { unique: true });
+lessonProgressSchema.index({ userId: 1, viewedAt: -1 });
 
 module.exports = mongoose.model("LessonProgress", lessonProgressSchema);

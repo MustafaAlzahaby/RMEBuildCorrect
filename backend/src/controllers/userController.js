@@ -10,8 +10,8 @@ const listUsers = asyncHandler(async (_req, res) => {
       {
         $group: {
           _id: "$userId",
-          completedLessons: { $sum: 1 },
-          lastCompletedAt: { $max: "$completedAt" },
+          guideViews: { $sum: 1 },
+          lastViewedAt: { $max: "$viewedAt" },
         },
       },
     ]),
@@ -21,8 +21,8 @@ const listUsers = asyncHandler(async (_req, res) => {
     progressCounts.map((item) => [
       item._id.toString(),
       {
-        completedLessons: item.completedLessons,
-        lastCompletedAt: item.lastCompletedAt,
+        guideViews: item.guideViews,
+        lastViewedAt: item.lastViewedAt,
       },
     ]),
   );
@@ -31,8 +31,8 @@ const listUsers = asyncHandler(async (_req, res) => {
     users: users.map((user) => ({
       ...user.toJSON(),
       progressSummary: countsByUser.get(user._id.toString()) || {
-        completedLessons: 0,
-        lastCompletedAt: null,
+        guideViews: 0,
+        lastViewedAt: null,
       },
     })),
   });

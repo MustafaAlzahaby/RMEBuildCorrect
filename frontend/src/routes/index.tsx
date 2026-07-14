@@ -35,15 +35,15 @@ export function HomePage() {
         <div className="container relative mx-auto px-4 py-20 md:py-28">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
-              <ShieldCheck className="h-3.5 w-3.5" /> Internal Engineering Academy
+              <ShieldCheck className="h-3.5 w-3.5" /> On-site Engineering Guide
             </span>
             <h1 className="mt-5 font-display text-4xl font-bold uppercase leading-tight tracking-tight text-foreground md:text-6xl">
               Build it right.<br />
               <span className="text-primary">Every single time.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-              Method statements, video walkthroughs, and field-tested best practices —
-              one platform for every Rowad engineer, on every site.
+              Find method statements, video walkthroughs, and field-tested best practices
+              whenever you need to know how work should be done on site.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg" className="bg-primary-gradient text-primary-foreground shadow-red-glow hover:opacity-95">
@@ -59,7 +59,7 @@ export function HomePage() {
 
           <div className="mt-14 grid grid-cols-2 gap-6 md:grid-cols-4">
             {[
-              { label: "Lessons", value: "120+", icon: BookOpen },
+              { label: "Guides", value: "120+", icon: BookOpen },
               { label: "Categories", value: "6", icon: ShieldCheck },
               { label: "Engineers", value: "850", icon: Trophy },
               { label: "Languages", value: "EN/AR", icon: BookOpen },
@@ -100,9 +100,9 @@ export function HomePage() {
           <div className="mb-8 flex items-end justify-between">
             <div>
               <h2 className="font-display text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl">
-                Recently Added Lessons
+                Recently Added Guides
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">Fresh content from the field.</p>
+              <p className="mt-1 text-sm text-muted-foreground">The latest practical guidance from the field.</p>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

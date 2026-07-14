@@ -58,7 +58,7 @@ router.put(
   lessonUpload,
   handleUploadError,
   [
-    param("id").isMongoId().withMessage("Valid lesson id is required"),
+    param("id").isMongoId().withMessage("Valid guide id is required"),
     body("title").optional().trim().isLength({ min: 2 }).withMessage("Title is too short"),
     body("slug").optional().trim().isLength({ min: 2 }).withMessage("Slug is too short"),
     body("categoryId").optional().isMongoId().withMessage("Valid category id is required"),
@@ -74,7 +74,7 @@ router.put(
 router.delete(
   "/:id",
   adminOnly,
-  [param("id").isMongoId().withMessage("Valid lesson id is required")],
+  [param("id").isMongoId().withMessage("Valid guide id is required")],
   validate,
   deleteLesson,
 );

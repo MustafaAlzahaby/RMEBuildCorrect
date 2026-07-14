@@ -1,6 +1,6 @@
-# Rowad Academy API
+# Rowad Field Guide API
 
-Node.js + Express REST API for the Rowad construction tutorial and academy platform.
+Node.js + Express REST API for the Rowad on-site field guide.
 
 ## Setup
 
@@ -26,6 +26,22 @@ Node.js + Express REST API for the Rowad construction tutorial and academy platf
    ```
 
 The API runs on `PORT` and exposes routes under `/api`.
+
+## Work-email verification
+
+Registration accepts only exact `@rowad-rme.com` addresses. New accounts cannot sign in until
+the employee opens the signed, expiring verification link sent to that mailbox.
+
+For local development, `EMAIL_DELIVERY=log` prints the verification URL in the backend terminal.
+For real delivery, configure the SMTP values in `.env` and set `EMAIL_DELIVERY=smtp`. Before
+starting the application, verify the connection and credentials:
+
+```bash
+npm run check-email
+```
+
+The resend endpoint applies a per-account cooldown, and issuing a new link invalidates all older
+verification links.
 
 ## Notes
 

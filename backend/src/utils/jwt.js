@@ -9,10 +9,18 @@ function signAuthToken(user) {
 }
 
 function signEmailVerificationToken(user) {
-  return jwt.sign({ purpose: "email-verification" }, env.EMAIL_VERIFICATION_SECRET, {
-    subject: user.id || user._id.toString(),
-    expiresIn: env.EMAIL_VERIFICATION_EXPIRES_IN,
-  });
+  return jwt.sign(
+    {
+      purpose: "email-verification",
+      email: user.email,
+      version: user.emailVerificationVersion,
+    },
+    env.EMAIL_VERIFICATION_SECRET,
+    {
+      subject: user.id || user._id.toString(),
+      expiresIn: env.EMAIL_VERIFICATION_EXPIRES_IN,
+    },
+  );
 }
 
 function verifyEmailVerificationToken(token) {

@@ -1,41 +1,31 @@
-import type { DashboardSummary } from "@/types";
-import { buildDashboardSummary } from "./adapters";
+import type { ViewHistoryEntry } from "@/types";
 import { apiRequest } from "./client";
-import { listLessons } from "./lessons";
 
-type ProgressResponse = {
-  completedLessons: Array<{
+type HistoryResponse = {
+  history: Array<{
     lessonId?: string | { id?: string; _id?: string };
+    viewedAt?: string;
     completedAt?: string;
   }>;
 };
 
-function lessonIdFromProgress(item: ProgressResponse["completedLessons"][number]) {
+function lessonIdFromHistory(item: HistoryResponse["history"][number]) {
   if (typeof item.lessonId === "string") return item.lessonId;
   return item.lessonId?.id ?? item.lessonId?._id ?? "";
 }
 
-async function completedSet(): Promise<Set<string>> {
-  const data = await apiRequest<ProgressResponse>("/progress");
-  return new Set(data.completedLessons.map(lessonIdFromProgress).filter(Boolean));
-}
-
-export async function isLessonComplete(_userId: string, lessonId: string): Promise<boolean> {
-  return (await completedSet()).has(lessonId);
-}
-
-export async function setLessonComplete(
-  _userId: string,
-  lessonId: string,
-  completed: boolean,
-): Promise<boolean> {
+export async function recordGuideView(lessonId: string): Promise<void> {
   await apiRequest<void>(`/progress/${lessonId}`, {
-    method: completed ? "POST" : "DELETE",
+    method: "POST",
   });
-  return completed;
 }
 
-export async function getDashboardSummary(_userId: string): Promise<DashboardSummary> {
-  const [lessons, completed] = await Promise.all([listLessons(), completedSet()]);
-  return buildDashboardSummary(lessons, completed);
+export async function getViewHistory(): Promise<ViewHistoryEntry[]> {
+  const data = await apiRequest<HistoryResponse>("/progress");
+  return data.history
+    .map((item) => ({
+      guideId: lessonIdFromHistory(item),
+      viewedAt: item.viewedAt ?? item.completedAt ?? "",
+    }))
+    .filter((item) => item.guideId && item.viewedAt);
 }

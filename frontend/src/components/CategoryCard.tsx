@@ -15,7 +15,7 @@ export function CategoryCard({ category }: { category: Category }) {
           <Icon className="h-6 w-6" />
         </div>
         <span className="rounded-full bg-surface-elevated px-2 py-0.5 text-xs font-medium text-muted-foreground">
-          {category.lessonCount} lesson{category.lessonCount === 1 ? "" : "s"}
+          {category.lessonCount} guide{category.lessonCount === 1 ? "" : "s"}
         </span>
       </div>
       <h3 className="mt-4 font-display text-lg font-semibold uppercase tracking-wide text-foreground">

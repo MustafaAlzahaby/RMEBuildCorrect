@@ -2,8 +2,7 @@ const express = require("express");
 const { param } = require("express-validator");
 const {
   getProgress,
-  markComplete,
-  unmarkComplete,
+  recordView,
 } = require("../controllers/progressController");
 const { verifyToken } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
@@ -15,15 +14,9 @@ router.use(verifyToken);
 router.get("/", getProgress);
 router.post(
   "/:lessonId",
-  [param("lessonId").isMongoId().withMessage("Valid lesson id is required")],
+  [param("lessonId").isMongoId().withMessage("Valid guide id is required")],
   validate,
-  markComplete,
-);
-router.delete(
-  "/:lessonId",
-  [param("lessonId").isMongoId().withMessage("Valid lesson id is required")],
-  validate,
-  unmarkComplete,
+  recordView,
 );
 
 module.exports = router;

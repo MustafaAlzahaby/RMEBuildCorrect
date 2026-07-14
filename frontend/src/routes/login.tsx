@@ -14,11 +14,13 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNeedsVerification(false);
     if (!isValidCompanyEmail(email)) {
       setError(`Email must end with ${EMAIL_DOMAIN}`);
       return;
@@ -29,7 +31,9 @@ export function LoginPage() {
       toast.success("Welcome back");
       navigate("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
+      setNeedsVerification(message.toLowerCase().includes("verify your email"));
     } finally {
       setLoading(false);
     }
@@ -53,8 +57,12 @@ export function LoginPage() {
             type="email"
             placeholder={`yourname${EMAIL_DOMAIN}`}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setNeedsVerification(false);
+            }}
             className="mt-1 bg-surface"
+            autoComplete="email"
             required
           />
           <p className="mt-1 text-xs text-muted-foreground">Only {EMAIL_DOMAIN} addresses are allowed.</p>
@@ -67,10 +75,21 @@ export function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 bg-surface"
+            autoComplete="current-password"
             required
           />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
+        {needsVerification && isValidCompanyEmail(email) && (
+          <p className="text-sm text-muted-foreground">
+            <Link
+              to={`/verify-email?email=${encodeURIComponent(email)}`}
+              className="text-primary hover:underline"
+            >
+              Resend the verification email
+            </Link>
+          </p>
+        )}
         <Button type="submit" disabled={loading} className="w-full bg-primary-gradient text-primary-foreground hover:opacity-90">
           {loading ? "Signing in…" : "Sign in"}
         </Button>

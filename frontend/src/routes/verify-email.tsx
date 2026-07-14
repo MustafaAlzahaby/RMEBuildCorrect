@@ -2,7 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { verifyEmail } from "@/api/auth";
+import { resendVerificationEmail, verifyEmail } from "@/api/auth";
 
 export function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
@@ -12,6 +12,15 @@ export function VerifyEmailPage() {
     token ? "loading" : "idle",
   );
   const [message, setMessage] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+  const [cooldown, setCooldown] = useState(60);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = window.setInterval(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     if (!token) return;
@@ -26,6 +35,21 @@ export function VerifyEmailPage() {
         setMessage(error instanceof Error ? error.message : "Verification failed.");
       });
   }, [token]);
+
+  const resend = async () => {
+    if (!email || resending || cooldown > 0) return;
+    setResending(true);
+    setResendMessage("");
+    try {
+      const result = await resendVerificationEmail(email);
+      setResendMessage("A new verification link has been requested. Check your inbox and spam folder.");
+      setCooldown(result.retryAfterSeconds ?? 60);
+    } catch (error) {
+      setResendMessage(error instanceof Error ? error.message : "Unable to resend verification email.");
+    } finally {
+      setResending(false);
+    }
+  };
 
   if (token) {
     return (
@@ -58,8 +82,24 @@ export function VerifyEmailPage() {
         Click it to activate your account.
       </p>
       <p className="mt-4 text-xs text-muted-foreground">
-        Didn't get it? Check your spam folder or contact IT support.
+        The link expires for your security. Check your spam folder if it is not in your inbox.
       </p>
+      {email && (
+        <Button
+          type="button"
+          variant="ghost"
+          className="mt-3"
+          disabled={resending || cooldown > 0}
+          onClick={resend}
+        >
+          {resending
+            ? "Sending…"
+            : cooldown > 0
+              ? `Resend available in ${cooldown}s`
+              : "Resend verification email"}
+        </Button>
+      )}
+      {resendMessage && <p className="mt-2 text-xs text-muted-foreground">{resendMessage}</p>}
       <Button asChild variant="outline" className="mt-6">
         <Link to="/login">Back to sign in</Link>
       </Button>

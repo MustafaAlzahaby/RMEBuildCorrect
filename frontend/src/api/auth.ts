@@ -5,7 +5,8 @@ import { apiRequest } from "./client";
 export const EMAIL_DOMAIN = "@rowad-rme.com";
 
 export function isValidCompanyEmail(email: string): boolean {
-  return email.trim().toLowerCase().endsWith(EMAIL_DOMAIN);
+  const parts = email.trim().toLowerCase().split("@");
+  return parts.length === 2 && parts[0].length > 0 && `@${parts[1]}` === EMAIL_DOMAIN;
 }
 
 export interface LoginInput { email: string; password: string }
@@ -36,6 +37,19 @@ export async function register(input: RegisterInput): Promise<{ pendingVerificat
 export async function verifyEmail(token: string): Promise<User> {
   const data = await apiRequest<{ user: User }>(`/auth/verify-email?token=${encodeURIComponent(token)}`);
   return mapUser(data.user);
+}
+
+export async function resendVerificationEmail(
+  email: string,
+): Promise<{ message: string; retryAfterSeconds?: number }> {
+  if (!isValidCompanyEmail(email)) throw new Error(`Email must end with ${EMAIL_DOMAIN}`);
+  return apiRequest<{ message: string; retryAfterSeconds?: number }>(
+    "/auth/resend-verification",
+    {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    },
+  );
 }
 
 export async function getCurrentUser(): Promise<User | null> {
