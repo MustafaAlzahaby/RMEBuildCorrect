@@ -48,9 +48,11 @@
   --font-sans: "Inter", system-ui, sans-serif;
 }
 
-/* Dark-only industrial theme. Red primary. */
+/* Industrial palette with a red accent. */
 :root {
+  color-scheme: dark;
   --radius: 0.5rem;
+  --construction-photo: url("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1800&q=85");
 
   --background: oklch(0.16 0.012 250);
   --foreground: oklch(0.97 0.005 250);
@@ -104,7 +106,52 @@
   --shadow-red-glow: 0 0 40px -10px oklch(0.58 0.22 27 / 0.45);
 }
 
-.dark { /* same tokens — always dark */ }
+:root:not(.dark) {
+  color-scheme: light;
+
+  --background: #f5f7fa;
+  --foreground: #17202c;
+  --surface: #eef1f5;
+  --surface-elevated: #e8edf3;
+  --card: #fff;
+  --card-foreground: var(--foreground);
+  --popover: #fff;
+  --popover-foreground: var(--foreground);
+  --primary: #b72328;
+  --secondary: #e6ebf1;
+  --secondary-foreground: var(--foreground);
+  --muted: #e9edf2;
+  --muted-foreground: #4d5a6b;
+  --accent: #e3e9f1;
+  --accent-foreground: var(--foreground);
+  --destructive: #b42328;
+  --border: #cdd5e0;
+  --input: #9ca9b9;
+  --ring: var(--primary);
+  --sidebar: #fff;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --gradient-hero: linear-gradient(135deg, #fff, #eef2f7 60%, #f5e4e4);
+  --shadow-elevated: 0 10px 40px -10px rgb(23 32 44 / 0.22);
+  --shadow-red-glow: 0 0 40px -10px rgb(183 35 40 / 0.25);
+}
+
+:root:not(.dark) body {
+  background-image:
+    linear-gradient(rgb(248 250 253 / 0.86), rgb(241 245 249 / 0.9)),
+    var(--construction-photo);
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+:root:not(.dark) .home-hero::before {
+  content: none;
+}
 
 @layer base {
   html, body { background-color: var(--color-background); color: var(--color-foreground); }
@@ -135,7 +182,7 @@
 
   .home-hero-image {
     background-attachment: fixed;
-    background-image: url("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1800&q=85");
+    background-image: var(--construction-photo);
     background-position: center;
     background-size: cover;
     opacity: 1;

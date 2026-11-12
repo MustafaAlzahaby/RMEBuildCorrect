@@ -1,0 +1,15 @@
+Before starting any construction activity, the Construction Department shall initiate a Start New Activity Request to ensure that all required documents and approvals are available. The following approved documents shall be attached to the request, as applicable:
+
+5.1 Approved Shop Drawings: Latest approved drawings related to the activity.
+
+5.2 Approved Material Submittals: All materials intended to be used in the activity (such as polyethylene sheet).
+
+5.3 Approved Method Statement: Describing the execution methodology and required resources for PC footings.
+
+5.4 Approved Inspection & Test Plan (ITP): Defining inspection stages, testing requirements, responsibilities, and acceptance criteria.
+
+5.5 Approved Concrete Mix Design: Applicable to activities involving concrete works.
+
+5.6 Approved RFIs / RFPs (If Applicable): Attach all relevant approved Requests for Information (RFIs) and Requests for Proposal (RFPs), if any, related to the activity, including any approved clarifications or changes that may affect the execution works.
+
+Important: The activity shall not be started until the required documents have been submitted, reviewed, and approved.

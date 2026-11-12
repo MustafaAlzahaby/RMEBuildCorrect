@@ -1,5 +1,14 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { HardHat, Menu, Shield, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
+import {
+  HardHat,
+  Menu,
+  Moon,
+  Sun,
+  Shield,
+  LayoutDashboard,
+  LogOut,
+  User as UserIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -18,6 +27,19 @@ export function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  function toggleTheme() {
+    const dark = !isDark;
+    document.documentElement.classList.toggle("dark", dark);
+    setIsDark(dark);
+    try {
+      localStorage.setItem("rowad-theme", dark ? "dark" : "light");
+    } catch {
+      // The toggle still works for this visit.
+    }
+  }
 
   const navLinks = (
     <>
@@ -84,6 +106,17 @@ export function Navbar() {
         <nav className="hidden items-center gap-6 md:flex">{navLinks}</nav>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 shrink-0"
+            onClick={toggleTheme}
+            aria-label="Dark mode"
+            aria-pressed={isDark}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+          </Button>
           {isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

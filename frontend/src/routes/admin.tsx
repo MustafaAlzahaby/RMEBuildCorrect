@@ -393,7 +393,7 @@ function UsersAdmin() {
                 <div className="flex flex-col gap-1">
                   <Badge
                     variant={u.verified ? "default" : "secondary"}
-                    className={u.verified ? "bg-emerald-600/20 text-emerald-400" : ""}
+                    className={u.verified ? "bg-emerald-600/20 text-emerald-800 dark:text-emerald-400" : ""}
                   >
                     {u.verified ? "Verified" : "Unverified"}
                   </Badge>

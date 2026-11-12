@@ -1,0 +1,34 @@
+The ITP is a quality control document that identifies the required inspections, tests, inspection stages, acceptance criteria, and responsibilities. The QC Engineer and Technical Office shall ensure that Inspection Requests (IRs) cover all work items in the project Work Breakdown Structure (WBS) before execution. The ITP must contain the following:
+
+4.1 Required Submittals: Identify all documents requiring submission and approval, including:
+• Shop Drawings.
+• Method Statement for PC footings & PC Raft, including curing & repair.
+• Concrete Mix Design.
+• Material Submittals (Polyethylene Sheet in PC footings, including the specified thickness in microns).
+
+4.2 Work Inspection Stages: Identify the required inspection stages, such as:
+• Excavation and formation level inspection by survey team.
+• Soil compaction inspection.
+• Polyethylene Sheet installation inspection.
+• Formwork inspection.
+
+4.3 Required Tests: Identify the required field and laboratory tests, including:
+• Concrete slump test, where specified.
+• Concrete temperature measurement, where specified.
+• Concrete compressive strength tests at 7 and 28 days.
+• Any additional tests required by the project specifications.
+
+4.4 Acceptance Criteria: Each inspection and test shall have clearly defined acceptance criteria based on the approved project specifications, drawings, and applicable standards (such as ECP, ASTM, BS, etc.).
+
+4.5 Inspection Levels: Understand the inspection levels assigned to each activity:
+• M – Monitor: Watching and supervising while the work continues normally.
+• H – Hold Point: Work shall not proceed without the required inspection and release (such as formwork).
+• W – Witness Point: The Consultant shall be notified to witness the inspection or test (such as sand cone test result).
+• S – Surveillance: Periodic monitoring of the activity.
+• R – Review: Review of documents, reports, or test results (such as cubes test results).
+
+4.6 Controlling Documents: Documents used to control and verify the activity, such as project specifications, approved shop drawings, Method Statement, ECP, ASTM, etc.
+
+4.7 Responsibilities & Frequency: Define the parties responsible for performing, inspecting, reviewing, and approving each activity (Construction Manager, QC Engineer, QC Manager, Surveying Team).
+
+Frequency: Specify how often each inspection or test shall be performed, based on the project specifications and approved ITP (such as every specified area for footings or group of footings).

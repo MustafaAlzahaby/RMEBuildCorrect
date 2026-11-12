@@ -14,8 +14,8 @@ export function HomePage() {
   return (
     <div>
       <section className="home-hero relative overflow-hidden border-b border-border">
-        <div className="home-hero-image absolute inset-0" aria-hidden="true" />
-        <div className="absolute inset-0 bg-background/90" />
+        <div className="home-hero-image absolute inset-0 hidden dark:block" aria-hidden="true" />
+        <div className="absolute inset-0 hidden bg-background/90 dark:block" />
         <div className="relative mx-auto max-w-4xl px-4 py-16 sm:py-24">
           <p className="text-sm font-medium text-primary">Rowad Field Guide</p>
           <h1 className="mt-4 max-w-2xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl">

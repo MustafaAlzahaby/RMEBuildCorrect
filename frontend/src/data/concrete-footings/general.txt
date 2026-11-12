@@ -1,0 +1,41 @@
+Before starting this activity, the Site Engineer shall ensure that all required technical documents, approvals, and preparations are completed.
+
+1.1 Project Specifications: Site engineer must review the project specifications to know the technical requirements for Plain Concrete (PC) Footings or Raft, including:
+• Concrete: Concrete grade, maximum water-cement ratio, and slump range.
+• Tolerances: Structural dimensions and thickness acceptance criteria.
+• Materials: Verify specified materials (e.g., heavy-duty Polyethylene sheet with a minimum thickness of 400 microns or as per specs).
+• Execution & Placement Methodology: As per project specifications.
+• Surface Preparation & Repair: How to repair surface defects such as honeycombing or segregation.
+• Testing: Such as slump, concrete cubes, and temperature.
+• Curing Requirements: Method of curing using water or curing compound.
+
+1.2 Soil Investigation Report Review & Compliance: The Site Engineer must review the Soil Report (especially recommendations in soil report) prior to start of works to know the following:
+• Bearing Capacity & Foundation Level: Compare the required bearing capacity and designated foundation level against the IFC drawings. Any discrepancies or conflicts must be immediately reported to the Technical Office to submit Request for Information (RFI) or Request for Proposal (RFP).
+• Concrete & Cement Specifications: Check recommendations for cement type and water-cement ratio.
+• Groundwater & Dewatering: Groundwater levels and required dewatering methods, if found.
+• Minimum Footprint: The minimum required footprint and excavation dimensions as per geotechnical recommendations.
+
+1.3 Bill of Quantities (BOQ) Review: Review the BOQ to verify the scope of work, specified concrete grade, and required materials. In case of any discrepancies between the BOQ, drawings, and specifications, refer to the Technical Office to raise an RFI or take the necessary corrective action.
+
+1.4 Approved Drawings Review: Ensure that the latest approved drawings are available at the site and that all dimensions, levels, and details are clearly understood and comply with the project specifications and IFC drawings.
+
+1.5 Concrete Mix Design: The Quality Control Department shall prepare the concrete mix design according to the specified concrete grade and applicable project requirements. If the concrete grade or mix requirements are unclear, coordinate with the Technical Office before proceeding. The proposed mix design shall comply with the applicable standards specified in the project specifications.
+
+Use these documents together to manage the concrete mix design workflow:
+• ACI 211.1: Selecting concrete proportions
+• ACI 301: Structural concrete specifications
+• ACI 214: Strength test result evaluation
+• ASTM C94: Ready-mix concrete delivery
+
+And must be submitted to the consultant for approval.
+
+Reference: ECP203/2017 - الباب الثاني - مواد وخلطات الخرسانة – بند 4-2 - صفحة رقم 41-2
+
+1.6 Trial Mix: After obtaining approval, arrange a trial mix to verify the concrete properties and confirm its compliance with the Approved Mix Design. Perform the required fresh and hardened concrete tests, including:
+• Fresh concrete tests, as specified (slump, temperature).
+• Compressive strength tests at 7 days.
+• Compressive strength tests at 28 days.
+
+Submit the test results to the Consultant for review and approval, where required.
+
+Reference: ECP203/2017 - الباب الثاني - مواد وخلطات الخرسانة – بند 3-4-2 صفحة رقم 43-2

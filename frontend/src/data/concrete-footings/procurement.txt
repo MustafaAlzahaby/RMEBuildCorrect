@@ -1,0 +1,5 @@
+1. Procure Materials: Procure materials according to approved Material Submittals, such as Polyethylene sheets.
+
+2. Quantity: Determine required material quantities in coordination with the Technical Office based on site consumption rates to prevent material expiration.
+
+3. Internal Inspection: After arrival on-site, the Execution Engineer must inspect the delivered materials against the approved Material Submittal. Then, an internal Material Inspection Request (MIR) shall be submitted to the QC team for inspection.

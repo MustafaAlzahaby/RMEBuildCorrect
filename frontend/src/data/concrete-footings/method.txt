@@ -1,0 +1,19 @@
+The construction department shall prepare a method statement for the activity (PC footing or Raft) based on the project specs and approved shop drawings. The Method Statement shall explain the construction sequence, equipment, manpower, and safety precautions. The Method Statement shall be reviewed to understand the following:
+
+1. Scope of Work: Activities covered by the Method Statement (How to execute PC footings or PC Raft).
+
+2. References: Approved Shop drawings, specifications, and approved material submittals.
+
+3. Responsibilities: Duties of the involved departments such as Construction Manager, Site Engineer, QC Engineer, QC Manager, etc.
+
+4. Materials: Required materials for execution such as Polyethylene sheet.
+
+5. Equipment: Tools and equipment required for execution.
+
+6. Manpower: Required workforce and supervision.
+
+7. Execution Sequence: Detailed construction steps.
+
+8. Safety Requirements: Applicable precautions and risk control measures must be submitted by the safety team.
+
+Important: The Method Statement explains HOW the work shall be executed, while the project specifications define WHAT technical requirements must be achieved

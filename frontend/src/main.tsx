@@ -4,6 +4,7 @@ import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
 import "./styles.css";
 import { AdminPage } from "@/routes/admin";
+import { ConcreteFootingReferencesPage } from "@/routes/concrete-footing-references";
 import { DashboardPage } from "@/routes/dashboard";
 import { HomePage } from "@/routes";
 import { LessonPage } from "@/routes/lessons.$id";
@@ -99,6 +100,10 @@ function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route
+                path="/library/concrete-footings/references"
+                element={<ProtectedRoute><ConcreteFootingReferencesPage /></ProtectedRoute>}
+              />
               <Route path="/library" element={<ProtectedRoute><LibraryPage /></ProtectedRoute>} />
               <Route path="/lessons/:id" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
