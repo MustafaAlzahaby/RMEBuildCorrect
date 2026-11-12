@@ -8,6 +8,7 @@
     "create-admin": "node scripts/createAdmin.js",
     "check-email": "node scripts/checkEmail.js",
     "seed-categories": "node scripts/seedCategories.js",
+    "seed-library-demo": "node scripts/seedLibraryDemo.js",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "check": "node --check src/server.js"

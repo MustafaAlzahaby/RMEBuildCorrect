@@ -4,6 +4,8 @@ type ApiCategory = {
   id: string;
   name: string;
   slug: string;
+  code?: string;
+  parentId?: string | null;
   description?: string;
   thumbnailUrl?: string;
   lessonCount?: number;
@@ -13,7 +15,7 @@ type ApiLesson = {
   id: string;
   title: string;
   slug?: string;
-  categoryId?: string | { id?: string; _id?: string; name?: string; slug?: string };
+  categoryId?: string | { id?: string; _id?: string; name?: string; slug?: string; code?: string };
   categoryName?: string;
   description?: string;
   videoUrl?: string;
@@ -22,6 +24,8 @@ type ApiLesson = {
   instructions?: string;
   bestPractices?: string;
   methodStatement?: string;
+  itp?: string;
+  lessonLearnt?: string;
   createdAt?: string;
 };
 
@@ -54,6 +58,8 @@ export function mapCategory(category: ApiCategory): Category {
     id: category.id,
     name: category.name,
     slug: category.slug,
+    code: category.code ?? "",
+    parentId: category.parentId ?? null,
     description: category.description ?? "",
     icon: "BookOpen",
     thumbnail: category.thumbnailUrl || undefined,
@@ -67,8 +73,11 @@ function categoryIdFor(lesson: ApiLesson): string {
 }
 
 function categoryNameFor(lesson: ApiLesson): string {
+  if (typeof lesson.categoryId === "object" && lesson.categoryId?.name) {
+    const code = lesson.categoryId.code?.trim();
+    return code ? `${code} - ${lesson.categoryId.name}` : lesson.categoryId.name;
+  }
   if (lesson.categoryName) return lesson.categoryName;
-  if (typeof lesson.categoryId === "object" && lesson.categoryId?.name) return lesson.categoryId.name;
   return "";
 }
 
@@ -94,6 +103,8 @@ export function mapLesson(lesson: ApiLesson): Lesson {
     instructions: lesson.instructions ?? "",
     bestPractices: lesson.bestPractices ?? "",
     methodStatement: lesson.methodStatement ?? "",
+    itp: lesson.itp ?? "",
+    lessonLearnt: lesson.lessonLearnt ?? "",
     createdAt: lesson.createdAt ?? "",
   };
 }

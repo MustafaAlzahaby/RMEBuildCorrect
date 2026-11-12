@@ -54,8 +54,8 @@ export async function resendVerificationEmail(
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    const data = await apiRequest<{ user: User }>("/auth/me");
-    return mapUser(data.user);
+    const data = await apiRequest<{ user: User | null }>("/auth/me");
+    return data.user ? mapUser(data.user) : null;
   } catch {
     return null;
   }

@@ -16,6 +16,8 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  code: string;
+  parentId?: string | null;
   description: string;
   icon: string; // lucide icon name
   thumbnail?: string;
@@ -40,6 +42,8 @@ export interface Lesson {
   instructions: string;
   bestPractices: string;
   methodStatement: string;
+  itp: string;
+  lessonLearnt: string;
   createdAt: string;
 }
 

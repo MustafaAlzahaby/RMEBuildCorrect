@@ -14,7 +14,7 @@ import { VerifyEmailPage } from "@/routes/verify-email";
 import { AuthProvider } from "@/context/AuthContext";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { GuestOnlyRoute } from "@/components/ProtectedRoute";
+import { GuestOnlyRoute, ProtectedRoute } from "@/components/ProtectedRoute";
 import { Toaster } from "@/components/ui/sonner";
 import { reportLovableError } from "@/lib/lovable-error-reporting";
 
@@ -99,10 +99,10 @@ function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/library" element={<LibraryPage />} />
-              <Route path="/lessons/:id" element={<LessonPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/library" element={<ProtectedRoute><LibraryPage /></ProtectedRoute>} />
+              <Route path="/lessons/:id" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminPage /></ProtectedRoute>} />
               <Route path="/login" element={<GuestOnlyRoute><LoginPage /></GuestOnlyRoute>} />
               <Route path="/register" element={<GuestOnlyRoute><RegisterPage /></GuestOnlyRoute>} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />

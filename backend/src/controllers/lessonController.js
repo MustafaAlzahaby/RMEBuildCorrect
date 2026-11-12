@@ -33,6 +33,8 @@ function pickLessonFields(body) {
     "instructions",
     "bestPractices",
     "methodStatement",
+    "itp",
+    "lessonLearnt",
   ];
 
   return allowed.reduce((patch, field) => {
@@ -62,7 +64,7 @@ async function attachUploadedAssets(patch, files = {}) {
 const listLessons = asyncHandler(async (req, res) => {
   const filter = await resolveCategoryFilter(req.query.category);
   const lessons = await Lesson.find(filter)
-    .populate("categoryId", "name slug")
+    .populate("categoryId", "name slug code parentId")
     .sort({ createdAt: -1 });
   const signedLessons = await Promise.all(lessons.map((lesson) => signLessonAssets(lesson)));
 
@@ -73,7 +75,7 @@ const getLesson = asyncHandler(async (req, res) => {
   const query = mongoose.Types.ObjectId.isValid(req.params.slug)
     ? { _id: req.params.slug }
     : { slug: req.params.slug };
-  const lesson = await Lesson.findOne(query).populate("categoryId", "name slug");
+  const lesson = await Lesson.findOne(query).populate("categoryId", "name slug code parentId");
 
   if (!lesson) {
     throw new AppError("Guide not found", 404);

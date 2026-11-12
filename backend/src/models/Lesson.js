@@ -39,6 +39,16 @@ const lessonSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    itp: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    lessonLearnt: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     videoUrl: {
       type: String,
       default: "",

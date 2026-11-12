@@ -7,7 +7,9 @@ type CategoryInput = Omit<Category, "id" | "lessonCount">;
 function toCategoryPayload(input: Partial<CategoryInput>) {
   return {
     name: input.name,
-    slug: input.slug,
+    slug: input.slug?.trim() || undefined,
+    code: input.code,
+    parentId: input.parentId || null,
     description: input.description,
     thumbnailUrl: input.thumbnail,
   };
@@ -20,7 +22,9 @@ export async function listCategories(): Promise<Category[]> {
 
 export async function getCategory(slug: string): Promise<Category | null> {
   try {
-    const data = await apiRequest<{ category: Category }>(`/categories/${encodeURIComponent(slug)}`);
+    const data = await apiRequest<{ category: Category }>(
+      `/categories/${encodeURIComponent(slug)}`,
+    );
     return mapCategory(data.category);
   } catch {
     return null;

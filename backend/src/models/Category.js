@@ -14,6 +14,16 @@ const categorySchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    code: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    parentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
+    },
     description: {
       type: String,
       default: "",
@@ -30,6 +40,7 @@ const categorySchema = new mongoose.Schema(
     toJSON: {
       transform(_doc, ret) {
         ret.id = ret._id.toString();
+        ret.parentId = ret.parentId ? ret.parentId.toString() : null;
         delete ret._id;
         delete ret.__v;
         return ret;
@@ -37,5 +48,7 @@ const categorySchema = new mongoose.Schema(
     },
   },
 );
+
+categorySchema.index({ parentId: 1, code: 1 });
 
 module.exports = mongoose.model("Category", categorySchema);

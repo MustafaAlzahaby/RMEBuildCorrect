@@ -22,6 +22,7 @@ const lessonUpload = upload.fields([
 
 router.get(
   "/",
+  verifyToken,
   [query("category").optional().trim().notEmpty().withMessage("Category filter cannot be empty")],
   validate,
   listLessons,
@@ -29,6 +30,7 @@ router.get(
 
 router.get(
   "/:slug",
+  verifyToken,
   [param("slug").trim().notEmpty().withMessage("Slug is required")],
   validate,
   getLesson,
@@ -47,6 +49,8 @@ router.post(
     body("instructions").optional().isString(),
     body("bestPractices").optional().isString(),
     body("methodStatement").optional().isString(),
+    body("itp").optional().isString(),
+    body("lessonLearnt").optional().isString(),
   ],
   validate,
   createLesson,
@@ -66,6 +70,8 @@ router.put(
     body("instructions").optional().isString(),
     body("bestPractices").optional().isString(),
     body("methodStatement").optional().isString(),
+    body("itp").optional().isString(),
+    body("lessonLearnt").optional().isString(),
   ],
   validate,
   updateLesson,

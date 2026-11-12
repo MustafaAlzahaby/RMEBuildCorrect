@@ -1,36 +1,46 @@
 import { Link } from "react-router-dom";
-import { PlayCircle } from "lucide-react";
+import { ArrowRight, BookOpen, PlayCircle } from "lucide-react";
 import type { Lesson } from "@/types";
-import { formatDate, truncateText } from "@/utils";
 
 export function LessonCard({ lesson }: { lesson: Lesson }) {
-  const thumb = lesson.images[0]?.url;
+  const thumbnail = lesson.images[0]?.url;
   return (
     <Link
       to={`/lessons/${lesson.id}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all hover:border-primary/60 hover:shadow-elevated"
+      className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
-      <div className="relative aspect-video w-full overflow-hidden bg-surface-elevated">
-        {thumb ? (
+      <div className="relative aspect-[16/9] overflow-hidden bg-surface-elevated">
+        {thumbnail ? (
           <img
-            src={thumb}
-            alt={lesson.title}
+            src={thumbnail}
+            alt=""
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">No image</div>
+          <div className="flex h-full w-full items-center justify-center bg-hero">
+            <BookOpen className="h-16 w-16 text-foreground/50" aria-hidden="true" />
+          </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-        <PlayCircle className="absolute bottom-3 right-3 h-9 w-9 text-primary-foreground/90 drop-shadow" />
-        <span className="absolute left-3 top-3 rounded-md bg-primary/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-          {lesson.categoryName}
-        </span>
+        {lesson.videoUrl && (
+          <span className="absolute bottom-4 right-4 flex items-center gap-2 rounded-lg bg-background/90 px-3 py-2 text-sm font-medium text-foreground">
+            <PlayCircle className="h-5 w-5" aria-hidden="true" /> Video
+          </span>
+        )}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-display text-base font-semibold text-foreground line-clamp-2">{lesson.title}</h3>
-        <p className="mt-1 flex-1 text-sm text-muted-foreground">{truncateText(lesson.description, 100)}</p>
-        <span className="mt-3 text-xs text-muted-foreground">{formatDate(lesson.createdAt)}</span>
+      <div className="flex flex-1 flex-col p-6">
+        <p className="mb-3 text-sm font-medium leading-6 text-muted-foreground">
+          {lesson.categoryName}
+        </p>
+        <h3 className="text-2xl font-semibold leading-snug text-foreground">{lesson.title}</h3>
+        {lesson.description && (
+          <p className="mt-3 line-clamp-3 text-base leading-7 text-foreground/80">
+            {lesson.description}
+          </p>
+        )}
+        <span className="mt-auto flex items-center justify-between gap-3 pt-6 text-base font-semibold text-foreground">
+          Open guide <ArrowRight className="h-5 w-5 text-primary" aria-hidden="true" />
+        </span>
       </div>
     </Link>
   );

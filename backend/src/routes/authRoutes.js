@@ -8,7 +8,7 @@ const {
   resendVerification,
   verifyEmail,
 } = require("../controllers/authController");
-const { verifyToken } = require("../middleware/auth");
+const { optionalAuth } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 
 const router = express.Router();
@@ -71,6 +71,6 @@ router.post(
 );
 
 router.post("/logout", logout);
-router.get("/me", verifyToken, me);
+router.get("/me", optionalAuth, me);
 
 module.exports = router;

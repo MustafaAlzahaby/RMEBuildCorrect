@@ -45,20 +45,9 @@ export function Navbar() {
             }`
           }
         >
-          My Guide
+          Guides
         </NavLink>
       )}
-      <NavLink
-        to="/library"
-        onClick={() => setOpen(false)}
-        className={({ isActive }) =>
-          `text-sm font-medium transition-colors ${
-            isActive ? "text-primary" : "text-foreground/80 hover:text-foreground"
-          }`
-        }
-      >
-        Library
-      </NavLink>
       {isAdmin && (
         <NavLink
           to="/admin"
@@ -104,7 +93,9 @@ export function Navbar() {
                       {initials(user.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden text-sm font-medium pr-1 sm:inline">{user.name.split(" ")[0]}</span>
+                  <span className="hidden text-sm font-medium pr-1 sm:inline">
+                    {user.name.split(" ")[0]}
+                  </span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -116,7 +107,7 @@ export function Navbar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                  <LayoutDashboard className="mr-2 h-4 w-4" /> My Guide
+                  <LayoutDashboard className="mr-2 h-4 w-4" /> Guides
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate("/admin")}>
@@ -124,17 +115,29 @@ export function Navbar() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={async () => { await logout(); navigate("/"); }}>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await logout();
+                    navigate("/");
+                  }}
+                >
                   <LogOut className="mr-2 h-4 w-4" /> Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
-                <Link to="/login"><UserIcon className="mr-1 h-4 w-4" />Login</Link>
+              <Button variant="ghost" size="sm" asChild className="min-h-11">
+                <Link to="/login">
+                  <UserIcon className="mr-1 h-4 w-4" />
+                  Login
+                </Link>
               </Button>
-              <Button size="sm" asChild className="bg-primary-gradient text-primary-foreground hover:opacity-90">
+              <Button
+                size="sm"
+                asChild
+                className="bg-primary-gradient text-primary-foreground hover:opacity-90"
+              >
                 <Link to="/register">Sign Up</Link>
               </Button>
             </>
@@ -146,6 +149,8 @@ export function Navbar() {
             className="md:hidden"
             onClick={() => setOpen((o) => !o)}
             aria-label="Toggle menu"
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -154,7 +159,13 @@ export function Navbar() {
 
       {open && (
         <div className="border-t border-border bg-sidebar md:hidden">
-          <nav className="container mx-auto flex flex-col gap-3 px-4 py-4">{navLinks}</nav>
+          <nav
+            id="mobile-navigation"
+            aria-label="Mobile navigation"
+            className="container mx-auto flex flex-col gap-1 px-4 py-3 [&>a]:flex [&>a]:min-h-11 [&>a]:items-center"
+          >
+            {navLinks}
+          </nav>
         </div>
       )}
     </header>

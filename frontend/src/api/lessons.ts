@@ -19,11 +19,13 @@ function lessonFormData(input: Partial<LessonFormInput>) {
     "instructions",
     "bestPractices",
     "methodStatement",
+    "itp",
+    "lessonLearnt",
   ];
 
   fields.forEach((field) => {
     const value = input[field];
-    if (typeof value === "string" && value.length > 0) {
+    if (typeof value === "string" && (field !== "slug" || value.trim())) {
       formData.append(field, value);
     }
   });
@@ -43,7 +45,10 @@ function lessonFormData(input: Partial<LessonFormInput>) {
   return formData;
 }
 
-export async function listLessons(params?: { categoryId?: string; search?: string }): Promise<Lesson[]> {
+export async function listLessons(params?: {
+  categoryId?: string;
+  search?: string;
+}): Promise<Lesson[]> {
   const query = new URLSearchParams();
   if (params?.categoryId) query.set("category", params.categoryId);
 
@@ -73,9 +78,7 @@ export async function getLesson(idOrSlug: string): Promise<Lesson | null> {
 
 export async function recentLessons(limit = 4): Promise<Lesson[]> {
   const lessons = await listLessons();
-  return lessons
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, limit);
+  return lessons.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit);
 }
 
 export async function createLesson(input: LessonFormInput): Promise<Lesson> {
