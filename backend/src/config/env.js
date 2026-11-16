@@ -1,6 +1,10 @@
 const dotenv = require("dotenv");
 
-dotenv.config();
+const isVercelDeployment = process.env.VERCEL === "1" && process.env.VERCEL_ENV !== "development";
+
+if (!isVercelDeployment) {
+  dotenv.config();
+}
 
 const baseRequired = [
   "MONGODB_URI",
@@ -29,12 +33,56 @@ if (missing.length > 0) {
   throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
 }
 
+function parseOrigin(value, name) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${name} must contain valid HTTP or HTTPS origins`);
+  }
+
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash ||
+    url.hostname.includes("*")
+  ) {
+    throw new Error(`${name} must contain valid HTTP or HTTPS origins`);
+  }
+
+  return url.origin;
+}
+
+const frontendOrigin = parseOrigin(process.env.FRONTEND_ORIGIN, "FRONTEND_ORIGIN");
+const apiBaseUrl = parseOrigin(process.env.API_BASE_URL, "API_BASE_URL");
+const additionalOrigins = (process.env.CORS_ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+  .map((origin) => parseOrigin(origin, "CORS_ALLOWED_ORIGINS"));
+
+if (isVercelDeployment && fileStorage === "local") {
+  throw new Error("FILE_STORAGE=local is unavailable on Vercel. Configure S3 storage.");
+}
+
+if (isVercelDeployment && [frontendOrigin, apiBaseUrl].some((origin) => {
+  const url = new URL(origin);
+  return url.protocol !== "https:" || ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+})) {
+  throw new Error("FRONTEND_ORIGIN and API_BASE_URL must use deployed HTTPS origins on Vercel");
+}
+
 const env = {
-  NODE_ENV: process.env.NODE_ENV || "development",
+  NODE_ENV: isVercelDeployment ? "production" : process.env.NODE_ENV || "development",
+  IS_VERCEL_DEPLOYMENT: isVercelDeployment,
   PORT: Number(process.env.PORT || 5000),
   MONGODB_URI: process.env.MONGODB_URI,
-  FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN,
-  API_BASE_URL: process.env.API_BASE_URL,
+  FRONTEND_ORIGIN: frontendOrigin,
+  CORS_ALLOWED_ORIGINS: [frontendOrigin, ...additionalOrigins],
+  API_BASE_URL: apiBaseUrl,
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
   JWT_COOKIE_NAME: process.env.JWT_COOKIE_NAME || "academy_token",

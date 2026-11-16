@@ -5,7 +5,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const { Readable } = require("stream");
 const { env } = require("../config/env");
-const { s3Client } = require("../config/s3");
+const { getS3Client } = require("../config/s3");
 const { AppError } = require("../utils/AppError");
 
 const localUploadRoot = path.resolve(__dirname, "../../uploads");
@@ -50,7 +50,7 @@ async function uploadFile(file, folder) {
     throw new AppError("File uploads are not configured yet. Add AWS S3 settings before uploading files.", 503);
   }
 
-  await s3Client.send(
+  await getS3Client().send(
     new PutObjectCommand({
       Bucket: env.AWS_S3_BUCKET,
       Key: key,
@@ -76,12 +76,16 @@ async function getPresignedUrl(key) {
     return `${env.API_BASE_URL.replace(/\/$/, "")}/uploads/${relativePath}`;
   }
 
+  if (!isS3Configured()) {
+    throw new AppError("File downloads are unavailable until S3 is configured", 503);
+  }
+
   const command = new GetObjectCommand({
     Bucket: env.AWS_S3_BUCKET,
     Key: key,
   });
 
-  return getSignedUrl(s3Client, command, {
+  return getSignedUrl(getS3Client(), command, {
     expiresIn: env.S3_SIGNED_URL_EXPIRES_SECONDS,
   });
 }

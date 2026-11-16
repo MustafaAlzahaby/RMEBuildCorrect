@@ -5,14 +5,17 @@ const morgan = require("morgan");
 const path = require("path");
 
 const { env } = require("./config/env");
+const { connectDb, checkDbReady } = require("./config/db");
 const routes = require("./routes");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
+const { asyncHandler } = require("./utils/asyncHandler");
+const { AppError } = require("./utils/AppError");
 
 const app = express();
 
 app.use(
   cors({
-    origin: env.FRONTEND_ORIGIN,
+    origin: env.CORS_ALLOWED_ORIGINS,
     credentials: true,
   }),
 );
@@ -32,9 +35,28 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-app.use("/api", routes);
+app.get("/ready", async (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  try {
+    await checkDbReady();
+    res.json({ status: "ready" });
+  } catch {
+    res.status(503).json({ status: "unavailable" });
+  }
+});
 
-if (env.NODE_ENV === "production") {
+const awaitDatabase = asyncHandler(async (_req, _res, next) => {
+  try {
+    await connectDb();
+  } catch {
+    throw new AppError("Service temporarily unavailable", 503);
+  }
+  next();
+});
+
+app.use("/api", awaitDatabase, routes);
+
+if (env.NODE_ENV === "production" && !env.IS_VERCEL_DEPLOYMENT) {
   const frontendDist = path.resolve(__dirname, "../../frontend/dist");
   app.use(express.static(frontendDist, { index: false }));
   app.get(
