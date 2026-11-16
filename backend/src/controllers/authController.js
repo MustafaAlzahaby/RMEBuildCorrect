@@ -156,8 +156,15 @@ const login = asyncHandler(async (req, res) => {
     throw new AppError("Email must end with @rowad-rme.com", 400);
   }
 
+  res.locals.loginStage = "user_lookup";
   const user = await User.findOne({ email });
   if (!user || !user.isActive) {
+    throw new AppError("Invalid email or password", 401);
+  }
+
+  res.locals.loginStage = "password_verification";
+  if (typeof user.passwordHash !== "string" || !user.passwordHash) {
+    console.warn("[auth.login] stored_password_hash_missing_or_invalid_type");
     throw new AppError("Invalid email or password", 401);
   }
 
@@ -170,8 +177,11 @@ const login = asyncHandler(async (req, res) => {
     throw new AppError("Please verify your email before logging in.", 403);
   }
 
+  res.locals.loginStage = "jwt_signing";
   const token = signAuthToken(user);
+  res.locals.loginStage = "session_cookie";
   res.cookie(env.JWT_COOKIE_NAME, token, authCookieOptions());
+  res.locals.loginStage = "response_serialization";
   res.json({ message: "Logged in successfully", user });
 });
 
