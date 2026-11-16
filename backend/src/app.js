@@ -33,6 +33,21 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api", routes);
+
+if (env.NODE_ENV === "production") {
+  const frontendDist = path.resolve(__dirname, "../../frontend/dist");
+  app.use(express.static(frontendDist, { index: false }));
+  app.get(
+    ["/", "/login", "/register", "/verify-email", "/dashboard", "/admin", "/library", "/library/*", "/lessons/:id"],
+    (_req, res, next) => {
+      res.sendFile(path.join(frontendDist, "index.html"), (error) => {
+        if (error?.code === "ENOENT") return next();
+        if (error) return next(error);
+      });
+    },
+  );
+}
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 

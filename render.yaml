@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: build-correct-qa-api
+    runtime: node
+    plan: free
+    buildCommand: npm --prefix frontend ci --include=dev && npm --prefix frontend run build && npm --prefix backend ci --omit=dev
+    startCommand: npm --prefix backend start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_BASE_URL
+        value: /api
+      - key: MONGODB_URI
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: API_BASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: EMAIL_VERIFICATION_SECRET
+        generateValue: true
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_DELIVERY
+        value: log
+      - key: FILE_STORAGE
+        sync: false
