@@ -15,6 +15,9 @@ const lessonProgressSchema = new mongoose.Schema(
     completedAt: {
       type: Date,
     },
+    openCount: {
+      type: Number,
+    },
     viewedAt: {
       type: Date,
       default: Date.now,

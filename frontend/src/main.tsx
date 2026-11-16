@@ -5,6 +5,7 @@ import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import "./styles.css";
 import { AdminPage } from "@/routes/admin";
 import { ConcreteFootingReferencesPage } from "@/routes/concrete-footing-references";
+import { ConcreteFootingWorkspace } from "@/routes/concrete-footing-workspace";
 import { DashboardPage } from "@/routes/dashboard";
 import { HomePage } from "@/routes";
 import { LessonPage } from "@/routes/lessons.$id";
@@ -102,14 +103,68 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route
                 path="/library/concrete-footings/references"
-                element={<ProtectedRoute><ConcreteFootingReferencesPage /></ProtectedRoute>}
+                element={
+                  <ProtectedRoute>
+                    <ConcreteFootingReferencesPage />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="/library" element={<ProtectedRoute><LibraryPage /></ProtectedRoute>} />
-              <Route path="/lessons/:id" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminPage /></ProtectedRoute>} />
-              <Route path="/login" element={<GuestOnlyRoute><LoginPage /></GuestOnlyRoute>} />
-              <Route path="/register" element={<GuestOnlyRoute><RegisterPage /></GuestOnlyRoute>} />
+              <Route
+                path="/library"
+                element={
+                  <ProtectedRoute>
+                    <LibraryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/library/concrete-footings"
+                element={
+                  <ProtectedRoute>
+                    <ConcreteFootingWorkspace />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/lessons/:id"
+                element={
+                  <ProtectedRoute>
+                    <LessonPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  <GuestOnlyRoute>
+                    <LoginPage />
+                  </GuestOnlyRoute>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <GuestOnlyRoute>
+                    <RegisterPage />
+                  </GuestOnlyRoute>
+                }
+              />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -33,7 +33,8 @@ import { Badge } from "@/components/ui/badge";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { listCategories, createCategory, updateCategory, deleteCategory } from "@/api/categories";
 import { AdminGuides } from "@/components/admin/AdminGuides";
-import { listUsers, setUserActive, updateUserRole } from "@/api/users";
+import { listUsers, setUserActive, updateUserRole, type AdminUser } from "@/api/users";
+import { UserActivityDialog } from "@/components/admin/UserActivityDialog";
 import { categoryLabel } from "@/lib/categories";
 import type { Category, User, UserRole } from "@/types";
 import { toast } from "sonner";
@@ -338,8 +339,18 @@ function CategoryForm({
 /* ----------------------- Users ----------------------- */
 
 function UsersAdmin() {
-  const [users, setUsers] = useState<User[]>([]);
-  const refresh = () => listUsers().then(setUsers);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const refresh = () =>
+    listUsers()
+      .then((items) => {
+        setUsers(items);
+        setError("");
+      })
+      .catch(() => setError("Could not load user statistics."))
+      .finally(() => setLoading(false));
   useEffect(() => {
     refresh();
   }, []);
@@ -356,10 +367,64 @@ function UsersAdmin() {
     refresh();
   };
 
+  const query = search.trim().toLowerCase();
+  const filtered = users.filter(
+    (user) => user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query),
+  );
+  const totals = [
+    ["Users", users.length],
+    [
+      "Users with guide activity",
+      users.filter((user) => user.progressSummary.guideViews > 0).length,
+    ],
+    [
+      "Tracked guide opens",
+      users.reduce((sum, user) => sum + user.progressSummary.trackedOpens, 0),
+    ],
+    [
+      "Self-reported reviews",
+      users.reduce((sum, user) => sum + user.progressSummary.completedGuides, 0),
+    ],
+  ] as const;
+
   return (
     <div className="rounded-lg border border-border bg-card">
-      <div className="border-b border-border p-4">
+      <div className="space-y-4 border-b border-border p-4">
         <h2 className="font-display text-lg uppercase tracking-wide">Users</h2>
+        {loading && <p role="status">Loading user statistics…</p>}
+        {error && (
+          <div role="alert">
+            {error}{" "}
+            <Button variant="outline" onClick={refresh}>
+              Retry
+            </Button>
+          </div>
+        )}
+        {!loading && !error && (
+          <>
+            <dl className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+              {totals.map(([label, value]) => (
+                <div key={label} className="rounded-lg border bg-background p-3">
+                  <dt className="text-sm text-muted-foreground">{label}</dt>
+                  <dd className="mt-1 text-2xl font-semibold tabular-nums">
+                    {value.toLocaleString()}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="text-sm text-muted-foreground">
+              Guide activity covers published library guides. Tracked opens count activity after
+              open counting was enabled. Reviews are self-reported.
+            </p>
+            <Input
+              aria-label="Find a user"
+              placeholder="Search by name or email"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="max-w-sm"
+            />
+          </>
+        )}
       </div>
       <Table>
         <TableHeader>
@@ -368,11 +433,19 @@ function UsersAdmin() {
             <TableHead className="hidden md:table-cell">Email</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Guides opened</TableHead>
+            <TableHead>Reviewed</TableHead>
+            <TableHead>Activity</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((u) => (
+          {!loading && !error && filtered.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={8}>No users found.</TableCell>
+            </TableRow>
+          )}
+          {filtered.map((u) => (
             <TableRow key={u.id}>
               <TableCell className="font-medium">{u.name}</TableCell>
               <TableCell className="hidden text-muted-foreground md:table-cell">
@@ -393,7 +466,9 @@ function UsersAdmin() {
                 <div className="flex flex-col gap-1">
                   <Badge
                     variant={u.verified ? "default" : "secondary"}
-                    className={u.verified ? "bg-emerald-600/20 text-emerald-800 dark:text-emerald-400" : ""}
+                    className={
+                      u.verified ? "bg-emerald-600/20 text-emerald-800 dark:text-emerald-400" : ""
+                    }
                   >
                     {u.verified ? "Verified" : "Unverified"}
                   </Badge>
@@ -401,6 +476,11 @@ function UsersAdmin() {
                     {u.active ? "Active" : "Inactive"}
                   </Badge>
                 </div>
+              </TableCell>
+              <TableCell>{u.progressSummary.guideViews}</TableCell>
+              <TableCell>{u.progressSummary.completedGuides}</TableCell>
+              <TableCell>
+                <UserActivityDialog user={u} />
               </TableCell>
               <TableCell className="text-right">
                 <Button size="sm" variant="outline" onClick={() => onToggleActive(u)}>

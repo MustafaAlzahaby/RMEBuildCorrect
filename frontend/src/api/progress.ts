@@ -14,10 +14,16 @@ function lessonIdFromHistory(item: HistoryResponse["history"][number]) {
   return item.lessonId?.id ?? item.lessonId?._id ?? "";
 }
 
-export async function recordGuideView(lessonId: string): Promise<void> {
-  await apiRequest<void>(`/progress/${lessonId}`, {
+type ProgressResponse = { progress: { completedAt?: string } };
+
+export async function recordGuideView(lessonId: string) {
+  return apiRequest<ProgressResponse>(`/progress/${lessonId}`, {
     method: "POST",
   });
+}
+
+export function markGuideReviewed(lessonId: string) {
+  return apiRequest<ProgressResponse>(`/progress/${lessonId}/completion`, { method: "PUT" });
 }
 
 export async function getViewHistory(): Promise<ViewHistoryEntry[]> {

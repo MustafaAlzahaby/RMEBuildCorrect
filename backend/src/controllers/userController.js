@@ -11,6 +11,10 @@ const listUsers = asyncHandler(async (_req, res) => {
         $group: {
           _id: "$userId",
           guideViews: { $sum: 1 },
+          trackedOpens: { $sum: "$openCount" },
+          completedGuides: {
+            $sum: { $cond: [{ $ne: [{ $ifNull: ["$completedAt", null] }, null] }, 1, 0] },
+          },
           lastViewedAt: { $max: "$viewedAt" },
         },
       },
@@ -22,6 +26,8 @@ const listUsers = asyncHandler(async (_req, res) => {
       item._id.toString(),
       {
         guideViews: item.guideViews,
+        trackedOpens: item.trackedOpens,
+        completedGuides: item.completedGuides,
         lastViewedAt: item.lastViewedAt,
       },
     ]),
@@ -32,8 +38,39 @@ const listUsers = asyncHandler(async (_req, res) => {
       ...user.toJSON(),
       progressSummary: countsByUser.get(user._id.toString()) || {
         guideViews: 0,
+        trackedOpens: 0,
+        completedGuides: 0,
         lastViewedAt: null,
       },
+    })),
+  });
+});
+
+const getUserActivity = asyncHandler(async (req, res) => {
+  const user = await User.exists({ _id: req.params.id });
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  const page = Number(req.query.page ?? 1);
+  const pageSize = 25;
+  const items = await LessonProgress.find({ userId: user._id })
+    .sort({ viewedAt: -1, _id: -1 })
+    .skip((page - 1) * pageSize)
+    .limit(pageSize + 1)
+    .select("lessonId viewedAt completedAt openCount")
+    .populate("lessonId", "title")
+    .lean();
+
+  res.json({
+    hasNext: items.length > pageSize,
+    guides: items.slice(0, pageSize).map((item) => ({
+      id: item._id,
+      guideId: item.lessonId?._id ?? null,
+      title: item.lessonId?.title ?? null,
+      lastOpenedAt: item.viewedAt ?? null,
+      completedAt: item.completedAt ?? null,
+      trackedOpens: item.openCount ?? 0,
     })),
   });
 });
@@ -72,4 +109,4 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-module.exports = { deleteUser, listUsers, updateUser };
+module.exports = { deleteUser, getUserActivity, listUsers, updateUser };

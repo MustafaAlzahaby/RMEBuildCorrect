@@ -1,8 +1,11 @@
 import type { CSSProperties } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import * as Accordion from "@radix-ui/react-accordion";
 import { BookOpen, ChevronDown, ExternalLink, FileText, Layers } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import general from "@/data/concrete-footings/general.txt?raw";
 import procurement from "@/data/concrete-footings/procurement.txt?raw";
 import method from "@/data/concrete-footings/method.txt?raw";
@@ -47,7 +50,7 @@ const executionGalleries: Record<string, { images: number[]; caption: string }[]
   ],
 };
 
-function ExecutionPhotos({ section }: { section: string }) {
+export function ExecutionPhotos({ section }: { section: string }) {
   return executionGalleries[section].map(({ images, caption }) => (
     <figure key={caption} dir="rtl" lang="ar" className="rounded-lg border border-border p-3">
       <div className="grid gap-3 sm:grid-cols-2">
@@ -77,6 +80,89 @@ function ExecutionPhotos({ section }: { section: string }) {
       </figcaption>
     </figure>
   ));
+}
+
+const galleryPhotos = Object.values(executionGalleries)
+  .flatMap((groups) =>
+    groups.flatMap(({ images, caption }) =>
+      images.map((number) => ({
+        number,
+        caption,
+        src: executionPhotos[`/src/data/concrete-footings/photos/image${number}.jpeg`],
+      })),
+    ),
+  )
+  .sort((a, b) => a.number - b.number);
+
+export function FootingPhotoGallery() {
+  const [selected, setSelected] = useState(0);
+  const photo = galleryPhotos[selected];
+  const move = (offset: number) =>
+    setSelected((index) => (index + offset + galleryPhotos.length) % galleryPhotos.length);
+
+  return (
+    <Dialog>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {galleryPhotos.map(({ number, caption, src }, index) => (
+          <DialogTrigger key={number} asChild>
+            <button
+              type="button"
+              onClick={() => setSelected(index)}
+              className="overflow-hidden rounded-lg border text-start hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <img
+                src={src}
+                alt={caption}
+                loading="lazy"
+                className="aspect-[4/3] w-full bg-muted object-contain"
+              />
+              <span className="block p-2 text-sm">Photo {number}</span>
+            </button>
+          </DialogTrigger>
+        ))}
+      </div>
+      <DialogContent
+        aria-describedby={undefined}
+        className="max-h-[95dvh] w-[95vw] max-w-4xl overflow-auto"
+        onKeyDown={(event) => {
+          if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+            event.preventDefault();
+            move(event.key === "ArrowLeft" ? -1 : 1);
+          }
+        }}
+      >
+        <DialogTitle>
+          Photo {photo.number} of {galleryPhotos.length}
+        </DialogTitle>
+        <img
+          src={photo.src}
+          alt={photo.caption}
+          className="max-h-[60dvh] w-full rounded-md bg-muted object-contain"
+        />
+        <p dir="rtl" lang="ar">
+          {photo.caption}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => move(-1)}>
+            Previous
+          </Button>
+          <Button variant="outline" onClick={() => move(1)}>
+            Next
+          </Button>
+          <Button variant="outline" asChild>
+            <a href={photo.src} target="_blank" rel="noreferrer">
+              Open full size
+            </a>
+          </Button>
+          <Button variant="outline" asChild>
+            <a href={photo.src} download>
+              Download
+            </a>
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function FootingTabContent({ content }: { content: string }) {
@@ -219,6 +305,12 @@ function ConcreteFootings() {
           </Accordion.Trigger>
         </Accordion.Header>
         <Accordion.Content className={panelMotion}>
+          <Link
+            to="/library/concrete-footings"
+            className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-primary underline"
+          >
+            Open engineering activity workspace
+          </Link>
           <Tabs defaultValue={footingTabs[0].title} className="pt-4">
             <TabsList aria-label={title} className="flex h-auto flex-wrap justify-start gap-1">
               {footingTabs.map(({ title: tab }) => (
@@ -304,6 +396,11 @@ export function GuideCategoryBrowser({
                   <span className="text-2xl font-semibold leading-snug text-foreground">
                     {division.name}
                   </span>
+                  {division.description && (
+                    <span className="mt-2 text-sm text-muted-foreground">
+                      {division.description}
+                    </span>
+                  )}
                   <span className="mt-4 flex w-full items-center justify-between gap-3 text-base text-muted-foreground">
                     <span>
                       {count} guide{count === 1 ? "" : "s"}

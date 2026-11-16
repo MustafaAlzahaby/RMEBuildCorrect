@@ -21,18 +21,35 @@ const getProgress = asyncHandler(async (req, res) => {
 });
 
 const recordView = asyncHandler(async (req, res) => {
-  const lesson = await Lesson.findById(req.params.lessonId);
+  const lesson = await Lesson.exists({ _id: req.params.lessonId });
   if (!lesson) {
     throw new AppError("Guide not found", 404);
   }
 
   const progress = await LessonProgress.findOneAndUpdate(
     { userId: req.user._id, lessonId: lesson._id },
-    { viewedAt: new Date() },
+    { $max: { viewedAt: new Date() }, $inc: { openCount: 1 } },
     { new: true, upsert: true, setDefaultsOnInsert: true },
   );
 
   res.status(201).json({ progress });
 });
 
-module.exports = { getProgress, recordView };
+const completeGuide = asyncHandler(async (req, res) => {
+  const lesson = await Lesson.exists({ _id: req.params.lessonId });
+  if (!lesson) {
+    throw new AppError("Guide not found", 404);
+  }
+
+  const progress = await LessonProgress.findOneAndUpdate(
+    { userId: req.user._id, lessonId: lesson._id },
+    [{ $set: { completedAt: { $ifNull: ["$completedAt", "$$NOW"] } } }],
+    { new: true, updatePipeline: true },
+  );
+  if (!progress) {
+    throw new AppError("Open the guide before marking it as reviewed", 409);
+  }
+  res.json({ progress });
+});
+
+module.exports = { getProgress, recordView, completeGuide };
