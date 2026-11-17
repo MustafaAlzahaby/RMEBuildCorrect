@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+import { footingContext, trackLibraryActivity } from "@/api/libraryActivity";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +18,15 @@ export function ConcreteFootingReferencesPage() {
   const [params, setParams] = useSearchParams();
   const pdf =
     referencePdfs.find(({ filename }) => filename === params.get("file")) ?? referencePdfs[0];
+
+  const lastPreview = useRef<string | undefined>(undefined);
+  const context = `${footingContext} / Reference PDFs`;
+
+  useEffect(() => {
+    if (!pdf || lastPreview.current === pdf.filename) return;
+    lastPreview.current = pdf.filename;
+    trackLibraryActivity("file", pdf.filename, context);
+  }, [pdf, context]);
 
   return (
     <section className="container mx-auto max-w-6xl space-y-4 px-4 py-8">
@@ -39,12 +50,21 @@ export function ConcreteFootingReferencesPage() {
               </select>
             </label>
             <Button asChild variant="outline">
-              <a href={pdf.url} target="_blank" rel="noopener noreferrer">
+              <a
+                href={pdf.url}
+                onClick={() => trackLibraryActivity("file", pdf.filename, context)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Open PDF
               </a>
             </Button>
             <Button asChild>
-              <a href={pdf.url} download={pdf.filename}>
+              <a
+                href={pdf.url}
+                onClick={() => trackLibraryActivity("download", pdf.filename, context)}
+                download={pdf.filename}
+              >
                 Download
               </a>
             </Button>

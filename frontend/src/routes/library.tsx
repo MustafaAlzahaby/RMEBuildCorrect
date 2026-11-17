@@ -1,12 +1,13 @@
 import { useSearchParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { LessonCard } from "@/components/LessonCard";
 import { GuideCategoryBrowser } from "@/components/GuideCategoryBrowser";
+import { trackLibraryActivity } from "@/api/libraryActivity";
 import { listCategories } from "@/api/categories";
 import { listLessons } from "@/api/lessons";
-import { lessonBelongsToCategory } from "@/lib/categories";
+import { isDivision, lessonBelongsToCategory, parentOf } from "@/lib/categories";
 import { matchesGuideQuery } from "@/lib/guide-search";
 import type { Category, Lesson } from "@/types";
 
@@ -38,6 +39,31 @@ export function LibraryPage() {
       ignore = true;
     };
   }, []);
+
+  const previousSelection = useRef({ category: "", division: "" });
+
+  useEffect(() => {
+    const selected = categories.find(({ id }) => id === category);
+    const division = selected && (isDivision(selected) ? selected : parentOf(categories, selected));
+    const previous = previousSelection.current;
+
+    if (division && previous.division !== division.id) {
+      trackLibraryActivity(
+        "category",
+        division.name,
+        division.code ? `Division ${division.code}` : undefined,
+      );
+    }
+    if (selected && !isDivision(selected) && selected.id !== previous.category) {
+      trackLibraryActivity(
+        "subcategory",
+        selected.name,
+        [division?.name, selected.code].filter(Boolean).join(" / "),
+      );
+    }
+
+    previousSelection.current = { category: selected?.id ?? "", division: division?.id ?? "" };
+  }, [categories, category]);
 
   const results = useMemo(
     () =>

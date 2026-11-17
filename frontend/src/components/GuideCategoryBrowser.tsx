@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import * as Accordion from "@radix-ui/react-accordion";
 import { BookOpen, ChevronDown, ExternalLink, FileText, Layers } from "lucide-react";
+import { footingContext, footingTitle, trackLibraryActivity } from "@/api/libraryActivity";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,13 @@ export function ExecutionPhotos({ section }: { section: string }) {
             <a
               key={image}
               href={src}
+              onClick={() =>
+                trackLibraryActivity(
+                  "file",
+                  `Photo ${image}`,
+                  `${footingContext} / Execution / ${section}`,
+                )
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:odd:last:col-span-2 sm:odd:last:w-[calc(50%-0.375rem)] sm:odd:last:justify-self-center"
@@ -97,8 +105,17 @@ const galleryPhotos = Object.values(executionGalleries)
 export function FootingPhotoGallery() {
   const [selected, setSelected] = useState(0);
   const photo = galleryPhotos[selected];
+  function showPhoto(index: number) {
+    setSelected(index);
+    trackLibraryActivity(
+      "file",
+      `Photo ${galleryPhotos[index].number}`,
+      `${footingContext} / Photo gallery`,
+    );
+  }
+
   const move = (offset: number) =>
-    setSelected((index) => (index + offset + galleryPhotos.length) % galleryPhotos.length);
+    showPhoto((selected + offset + galleryPhotos.length) % galleryPhotos.length);
 
   return (
     <Dialog>
@@ -107,7 +124,7 @@ export function FootingPhotoGallery() {
           <DialogTrigger key={number} asChild>
             <button
               type="button"
-              onClick={() => setSelected(index)}
+              onClick={() => showPhoto(index)}
               className="overflow-hidden rounded-lg border text-start hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <img
@@ -150,12 +167,23 @@ export function FootingPhotoGallery() {
             Next
           </Button>
           <Button variant="outline" asChild>
-            <a href={photo.src} target="_blank" rel="noreferrer">
+            <a
+              href={photo.src}
+              onClick={() => trackLibraryActivity("file", `Photo ${photo.number}`, footingContext)}
+              target="_blank"
+              rel="noreferrer"
+            >
               Open full size
             </a>
           </Button>
           <Button variant="outline" asChild>
-            <a href={photo.src} download>
+            <a
+              href={photo.src}
+              onClick={() =>
+                trackLibraryActivity("download", `Photo ${photo.number}`, footingContext)
+              }
+              download
+            >
               Download
             </a>
           </Button>
@@ -290,14 +318,18 @@ function FootingReferences({ reference }: { reference?: string }) {
 }
 
 function ConcreteFootings() {
-  const title = "Plain Concrete (PC) Footings & Raft";
-
   return (
-    <Accordion.Root type="single" collapsible>
+    <Accordion.Root
+      type="single"
+      collapsible
+      onValueChange={(value) => {
+        if (value) trackLibraryActivity("subcategory", footingTitle, "Concrete / 03 30 00");
+      }}
+    >
       <Accordion.Item value="plain-concrete-footings-raft">
         <Accordion.Header>
           <Accordion.Trigger className="group flex w-full items-center justify-between gap-4 rounded-lg border border-border bg-card px-4 py-3 text-left font-semibold transition-colors hover:border-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary data-[state=open]:border-primary/60">
-            {title}
+            {footingTitle}
             <ChevronDown
               className="h-4 w-4 shrink-0 text-primary motion-safe:transition-transform group-data-[state=open]:rotate-180"
               aria-hidden="true"
@@ -311,8 +343,15 @@ function ConcreteFootings() {
           >
             Open engineering activity workspace
           </Link>
-          <Tabs defaultValue={footingTabs[0].title} className="pt-4">
-            <TabsList aria-label={title} className="flex h-auto flex-wrap justify-start gap-1">
+          <Tabs
+            defaultValue={footingTabs[0].title}
+            onValueChange={(tab) => trackLibraryActivity("tab", tab, footingContext)}
+            className="pt-4"
+          >
+            <TabsList
+              aria-label={footingTitle}
+              className="flex h-auto flex-wrap justify-start gap-1"
+            >
               {footingTabs.map(({ title: tab }) => (
                 <TabsTrigger key={tab} value={tab} className="whitespace-normal text-left text-xs">
                   {tab}

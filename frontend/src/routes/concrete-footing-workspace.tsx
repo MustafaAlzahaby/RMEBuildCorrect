@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { footingContext, footingTitle, trackLibraryActivity } from "@/api/libraryActivity";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuantityCalculator } from "@/components/QuantityCalculator";
@@ -77,6 +78,19 @@ function PreparationChecklist({
 export function ConcreteFootingWorkspace() {
   const [active, setActive] = useState(tabs[0]);
   const [reviewed, setReviewed] = useState<string[]>([]);
+  const recorded = useRef(false);
+
+  useEffect(() => {
+    if (recorded.current) return;
+    recorded.current = true;
+    trackLibraryActivity("workspace", footingTitle, "Concrete / 03 30 00");
+  }, []);
+
+  function selectTab(tab: string) {
+    setActive(tab);
+    trackLibraryActivity("tab", tab, footingContext);
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-5 px-4 py-8 sm:px-6">
       <nav aria-label="Breadcrumb" className="flex flex-wrap gap-2 text-sm text-muted-foreground">
@@ -107,7 +121,7 @@ export function ConcreteFootingWorkspace() {
           className="h-48 w-full object-cover md:h-full"
         />
       </header>
-      <Tabs value={active} onValueChange={setActive}>
+      <Tabs value={active} onValueChange={selectTab}>
         <TabsList
           aria-label="Engineering activity sections"
           className="flex h-auto flex-wrap justify-start gap-1"
@@ -124,7 +138,7 @@ export function ConcreteFootingWorkspace() {
               <>
                 <button
                   className="mb-5 min-h-11 rounded-md bg-primary px-4 font-medium text-primary-foreground"
-                  onClick={() => setActive(tabs[2])}
+                  onClick={() => selectTab(tabs[2])}
                 >
                   Start Execution Guide
                 </button>

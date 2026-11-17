@@ -1,3 +1,4 @@
+const LibraryActivity = require("../models/LibraryActivity");
 const User = require("../models/User");
 const LessonProgress = require("../models/LessonProgress");
 const { AppError } = require("../utils/AppError");
@@ -105,7 +106,10 @@ const deleteUser = asyncHandler(async (req, res) => {
     throw new AppError("User not found", 404);
   }
 
-  await LessonProgress.deleteMany({ userId: user._id });
+  await Promise.all([
+    LessonProgress.deleteMany({ userId: user._id }),
+    LibraryActivity.deleteMany({ userId: user._id }),
+  ]);
   res.status(204).send();
 });
 

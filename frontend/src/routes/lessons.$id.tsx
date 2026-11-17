@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
+import { trackLibraryActivity } from "@/api/libraryActivity";
 import { getLesson } from "@/api/lessons";
 import type { Lesson } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,6 +47,7 @@ export function LessonPage() {
   }
 
   const mainText = lesson.instructions.trim() ? lesson.instructions : lesson.methodStatement;
+  const context = [lesson.categoryName, lesson.title].filter(Boolean).join(" / ");
   const sections = [
     { id: "overview", label: "Overview", available: true },
     { id: "execution", label: "Execution Guide", available: Boolean(mainText.trim()) },
@@ -91,7 +93,13 @@ export function LessonPage() {
         Technical guidance must be verified against the applicable approved project documents and
         specifications before site execution.
       </p>
-      <Tabs defaultValue="overview">
+      <Tabs
+        defaultValue="overview"
+        onValueChange={(id) => {
+          const section = sections.find((item) => item.id === id);
+          if (section) trackLibraryActivity("tab", section.label, context);
+        }}
+      >
         <TabsList
           aria-label="Engineering activity sections"
           className="flex h-auto flex-wrap justify-start gap-1"
@@ -145,6 +153,7 @@ export function LessonPage() {
                 controls
                 preload="none"
                 className="aspect-video max-h-[65vh] w-full rounded-lg bg-black"
+                onPlay={() => trackLibraryActivity("file", "Guide video playback", context)}
                 src={lesson.videoUrl}
                 poster={lesson.images[0]?.url}
               />
@@ -153,10 +162,17 @@ export function LessonPage() {
           {lesson.images.length > 0 && (
             <GuideDetail title={`Reference photos (${lesson.images.length})`}>
               <div className="grid gap-4 sm:grid-cols-2">
-                {lesson.images.map((image) => (
+                {lesson.images.map((image, index) => (
                   <figure key={image.id}>
                     <a
                       href={image.url}
+                      onClick={() =>
+                        trackLibraryActivity(
+                          "file",
+                          `Reference photo ${index + 1}${image.caption ? ` · ${image.caption}` : ""}`,
+                          context,
+                        )
+                      }
                       target="_blank"
                       rel="noreferrer"
                       aria-label={"Open photo: " + (image.caption || lesson.title)}
@@ -179,9 +195,13 @@ export function LessonPage() {
             </GuideDetail>
           )}
           {lesson.pdfUrl && (
-            <GuideDetail title="PDF document">
+            <GuideDetail
+              title="PDF document"
+              onOpen={() => trackLibraryActivity("file", "Guide PDF preview", context)}
+            >
               <a
                 href={lesson.pdfUrl}
+                onClick={() => trackLibraryActivity("file", "Guide PDF", context)}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"
@@ -227,16 +247,22 @@ function GuideDetail({
   title,
   children,
   defaultOpen = false,
+  onOpen,
 }: {
   title: string;
   children: ReactNode;
   defaultOpen?: boolean;
+  onOpen?: () => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <details
       open={open}
-      onToggle={(event) => setOpen(event.currentTarget.open)}
+      onToggle={(event) => {
+        const next = event.currentTarget.open;
+        if (next && !open) onOpen?.();
+        setOpen(next);
+      }}
       className="group rounded-xl border border-border bg-card"
     >
       <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-4 font-medium hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary group-open:rounded-b-none group-open:bg-muted/50 [&::-webkit-details-marker]:hidden">

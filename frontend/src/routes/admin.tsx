@@ -413,8 +413,8 @@ function UsersAdmin() {
               ))}
             </dl>
             <p className="text-sm text-muted-foreground">
-              Guide activity covers published library guides. Tracked opens count activity after
-              open counting was enabled. Reviews are self-reported.
+              The totals here cover published guides. Open View activity for library browsing,
+              tab selections, file actions, and self-reported guide reviews.
             </p>
             <Input
               aria-label="Find a user"

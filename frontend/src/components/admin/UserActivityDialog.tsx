@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getUserActivity, type AdminUser, type UserActivityPage } from "@/api/users";
+import { Activity, BookOpen } from "lucide-react";
+import { LibraryActivityTimeline } from "./LibraryActivityTimeline";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,12 +28,32 @@ export function UserActivityDialog({ user }: { user: AdminUser }) {
           View activity
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-3xl overflow-auto">
-        <DialogHeader>
-          <DialogTitle>{user.name} · Guide activity</DialogTitle>
-          <DialogDescription>{user.email}</DialogDescription>
+      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-3xl gap-4 overflow-auto p-4 sm:p-6">
+        <DialogHeader className="flex-row items-center gap-3 rounded-xl border bg-primary/5 p-4 pe-9 text-start">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+            <Activity className="size-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0 space-y-1">
+            <DialogTitle className="break-words">{user.name} · Activity</DialogTitle>
+            <DialogDescription className="break-words">{user.email}</DialogDescription>
+          </div>
         </DialogHeader>
-        <ActivityHistory user={user} />
+        <Tabs defaultValue="library" className="min-w-0 gap-4">
+          <TabsList className="grid w-full grid-cols-2" aria-label="Activity views">
+            <TabsTrigger value="library">
+              <Activity aria-hidden="true" /> Library timeline
+            </TabsTrigger>
+            <TabsTrigger value="guides">
+              <BookOpen aria-hidden="true" /> Guide history
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="library">
+            <LibraryActivityTimeline userId={user.id} />
+          </TabsContent>
+          <TabsContent value="guides">
+            <ActivityHistory user={user} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
