@@ -414,7 +414,7 @@ function UsersAdmin() {
             </dl>
             <p className="text-sm text-muted-foreground">
               The totals here cover published guides. Open View activity for library browsing,
-              tab selections, file actions, and self-reported guide reviews.
+              tab selections, and file actions.
             </p>
             <Input
               aria-label="Find a user"

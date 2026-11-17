@@ -9,6 +9,7 @@ type ActivityPage = {
     kind: ActivityKind;
     title: string;
     context?: string;
+    inferred?: boolean;
     occurredAt: string;
   }>;
   counts: Partial<Record<ActivityKind, number>>;

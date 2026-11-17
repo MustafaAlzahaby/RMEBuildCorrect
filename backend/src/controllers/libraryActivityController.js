@@ -17,21 +17,77 @@ const getLibraryActivity = asyncHandler(async (req, res) => {
 
   const pageSize = 25;
   const page = Number(req.query.page ?? 1);
-  const filter = { userId: user._id };
-  if (req.query.kind) filter.kind = req.query.kind;
+  const userFilter = { userId: user._id };
+  const collection = LibraryActivity.collection.name;
 
-  const [items, counts] = await Promise.all([
-    LibraryActivity.find(filter)
-      .sort({ occurredAt: -1, _id: -1 })
-      .skip((page - 1) * pageSize)
-      .limit(pageSize + 1)
-      .select("kind title context occurredAt")
-      .lean(),
-    LibraryActivity.aggregate([
-      { $match: { userId: user._id } },
-      { $group: { _id: "$kind", count: { $sum: 1 } } },
-    ]),
+  // Recover category visits from older subcategory records with a parent breadcrumb.
+  // An explicit open for the same category takes precedence over inferred history.
+  const [timeline] = await LibraryActivity.aggregate([
+    { $match: userFilter },
+    {
+      $unionWith: {
+        coll: collection,
+        pipeline: [
+          { $match: { ...userFilter, kind: "subcategory", context: / \/ / } },
+          {
+            $project: {
+              occurredAt: 1,
+              parent: {
+                $trim: {
+                  input: { $arrayElemAt: [{ $split: ["$context", " / "] }, 0] },
+                },
+              },
+            },
+          },
+          { $match: { parent: { $ne: "" } } },
+          { $group: { _id: "$parent", occurredAt: { $max: "$occurredAt" } } },
+          {
+            $lookup: {
+              from: collection,
+              let: { parent: "$_id" },
+              pipeline: [
+                { $match: { ...userFilter, kind: "category" } },
+                { $match: { $expr: { $eq: ["$title", "$$parent"] } } },
+                { $limit: 1 },
+              ],
+              as: "directOpens",
+            },
+          },
+          { $match: { "directOpens.0": { $exists: false } } },
+          {
+            $project: {
+              _id: { $concat: ["inferred-category:", "$_id"] },
+              kind: { $literal: "category" },
+              title: "$_id",
+              occurredAt: 1,
+              inferred: { $literal: true },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $facet: {
+        items: [
+          ...(req.query.kind ? [{ $match: { kind: req.query.kind } }] : []),
+          { $sort: { occurredAt: -1, _id: -1 } },
+          { $skip: (page - 1) * pageSize },
+          { $limit: pageSize + 1 },
+          {
+            $project: {
+              kind: 1,
+              title: 1,
+              context: 1,
+              occurredAt: 1,
+              inferred: 1,
+            },
+          },
+        ],
+        counts: [{ $group: { _id: "$kind", count: { $sum: 1 } } }],
+      },
+    },
   ]);
+  const { items, counts } = timeline;
 
   res.set("Cache-Control", "private, no-store");
   res.json({

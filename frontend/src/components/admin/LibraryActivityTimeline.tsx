@@ -198,7 +198,9 @@ export function LibraryActivityTimeline({ userId }: { userId: string }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                    <span className="text-xs font-medium text-muted-foreground">{label}</span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {event.inferred ? "Category inferred from subcategory" : label}
+                    </span>
                     <time
                       dateTime={event.occurredAt}
                       className="text-xs text-muted-foreground tabular-nums"
