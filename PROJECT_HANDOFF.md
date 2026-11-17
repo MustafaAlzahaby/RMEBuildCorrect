@@ -88,7 +88,7 @@ Use a Node release supported by the installed Vite 8 version and a reachable Mon
 | SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS | SMTP connection settings. Use npm run check-email in backend to check delivery configuration. |
 | FILE_STORAGE | Set local for disk storage or s3 for S3. The code default is s3. |
 | AWS_REGION, AWS_S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY | S3 configuration. Check backend/src/config/s3.js for credential handling. |
-| VITE_API_BASE_URL | Optional frontend override. Default is http://localhost:5000/api. Include the /api prefix when overriding it. |
+| VITE_API_BASE_URL | Optional frontend override. Development defaults to http://localhost:5000/api. Production defaults to /api through the deployed site. Include the /api prefix when overriding it. |
 
 Start npm run dev in backend and frontend in separate terminals. Visit http://localhost:8080 and confirm http://localhost:5000/health responds. If the UI loads and API calls fail, check the backend process, MongoDB reachability, frontend API URL and configured origin. Use consistent hostnames for browser sessions. When deploying the SPA, configure the host to serve index.html for client-side routes such as /verify-email and /lessons/example.
 

@@ -1,7 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
-import { trackLibraryActivity } from "@/api/libraryActivity";
+import { apiUrl } from "@/api/client";
+import { fileOpenHandlers, trackLibraryActivity } from "@/api/libraryActivity";
 import { getLesson } from "@/api/lessons";
 import type { Lesson } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -166,13 +167,10 @@ export function LessonPage() {
                   <figure key={image.id}>
                     <a
                       href={image.url}
-                      onClick={() =>
-                        trackLibraryActivity(
-                          "file",
-                          `Reference photo ${index + 1}${image.caption ? ` · ${image.caption}` : ""}`,
-                          context,
-                        )
-                      }
+                      {...fileOpenHandlers(
+                        `Reference photo ${index + 1}${image.caption ? ` · ${image.caption}` : ""}`,
+                        context,
+                      )}
                       target="_blank"
                       rel="noreferrer"
                       aria-label={"Open photo: " + (image.caption || lesson.title)}
@@ -201,12 +199,18 @@ export function LessonPage() {
             >
               <a
                 href={lesson.pdfUrl}
-                onClick={() => trackLibraryActivity("file", "Guide PDF", context)}
+                {...fileOpenHandlers("Guide PDF", context)}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"
               >
                 Open PDF
+              </a>
+              <a
+                href={apiUrl(`/lessons/${lesson.id}/pdf/download`)}
+                className="ms-3 inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium hover:bg-muted"
+              >
+                Download PDF
               </a>
               <iframe
                 src={lesson.pdfUrl}

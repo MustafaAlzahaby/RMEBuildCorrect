@@ -3,6 +3,7 @@ const { body, param, query } = require("express-validator");
 const {
   createLesson,
   deleteLesson,
+  downloadLessonPdf,
   getLesson,
   listLessons,
   updateLesson,
@@ -26,6 +27,14 @@ router.get(
   [query("category").optional().trim().notEmpty().withMessage("Category filter cannot be empty")],
   validate,
   listLessons,
+);
+
+router.get(
+  "/:id/pdf/download",
+  verifyToken,
+  [param("id").isMongoId().withMessage("Valid guide id is required")],
+  validate,
+  downloadLessonPdf,
 );
 
 router.get(

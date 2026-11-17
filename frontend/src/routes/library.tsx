@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { LessonCard } from "@/components/LessonCard";
@@ -42,28 +42,36 @@ export function LibraryPage() {
 
   const previousSelection = useRef({ category: "", division: "" });
 
+  const recordSelection = useCallback(
+    (categoryId: string) => {
+      const selected = categories.find(({ id }) => id === categoryId);
+      const division =
+        selected && (isDivision(selected) ? selected : parentOf(categories, selected));
+      const previous = previousSelection.current;
+
+      if (division && previous.division !== division.id) {
+        trackLibraryActivity(
+          "category",
+          division.name,
+          division.code ? `Division ${division.code}` : undefined,
+        );
+      }
+      if (selected && !isDivision(selected) && selected.id !== previous.category) {
+        trackLibraryActivity(
+          "subcategory",
+          selected.name,
+          [division?.name, selected.code].filter(Boolean).join(" / "),
+        );
+      }
+
+      previousSelection.current = { category: selected?.id ?? "", division: division?.id ?? "" };
+    },
+    [categories],
+  );
+
   useEffect(() => {
-    const selected = categories.find(({ id }) => id === category);
-    const division = selected && (isDivision(selected) ? selected : parentOf(categories, selected));
-    const previous = previousSelection.current;
-
-    if (division && previous.division !== division.id) {
-      trackLibraryActivity(
-        "category",
-        division.name,
-        division.code ? `Division ${division.code}` : undefined,
-      );
-    }
-    if (selected && !isDivision(selected) && selected.id !== previous.category) {
-      trackLibraryActivity(
-        "subcategory",
-        selected.name,
-        [division?.name, selected.code].filter(Boolean).join(" / "),
-      );
-    }
-
-    previousSelection.current = { category: selected?.id ?? "", division: division?.id ?? "" };
-  }, [categories, category]);
+    recordSelection(category);
+  }, [category, recordSelection]);
 
   const results = useMemo(
     () =>
@@ -76,6 +84,7 @@ export function LibraryPage() {
   );
 
   function updateFilter(key: string, value: string) {
+    if (key === "category") recordSelection(value);
     setSearchParams(
       (previous) => {
         const next = new URLSearchParams(previous);

@@ -3,7 +3,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import * as Accordion from "@radix-ui/react-accordion";
 import { BookOpen, ChevronDown, ExternalLink, FileText, Layers } from "lucide-react";
-import { footingContext, footingTitle, trackLibraryActivity } from "@/api/libraryActivity";
+import {
+  fileOpenHandlers,
+  footingContext,
+  footingTitle,
+  trackLibraryActivity,
+} from "@/api/libraryActivity";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -61,13 +66,7 @@ export function ExecutionPhotos({ section }: { section: string }) {
             <a
               key={image}
               href={src}
-              onClick={() =>
-                trackLibraryActivity(
-                  "file",
-                  `Photo ${image}`,
-                  `${footingContext} / Execution / ${section}`,
-                )
-              }
+              {...fileOpenHandlers(`Photo ${image}`, `${footingContext} / Execution / ${section}`)}
               target="_blank"
               rel="noopener noreferrer"
               className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:odd:last:col-span-2 sm:odd:last:w-[calc(50%-0.375rem)] sm:odd:last:justify-self-center"
@@ -169,7 +168,7 @@ export function FootingPhotoGallery() {
           <Button variant="outline" asChild>
             <a
               href={photo.src}
-              onClick={() => trackLibraryActivity("file", `Photo ${photo.number}`, footingContext)}
+              {...fileOpenHandlers(`Photo ${photo.number}`, footingContext)}
               target="_blank"
               rel="noreferrer"
             >

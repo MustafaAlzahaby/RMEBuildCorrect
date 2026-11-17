@@ -68,6 +68,7 @@ export function LibraryActivityTimeline({ userId }: { userId: string }) {
     page: number;
     refresh: number;
     data?: ActivityPage;
+    error?: string;
   }>();
   const current =
     result?.userId === userId &&
@@ -85,8 +86,13 @@ export function LibraryActivityTimeline({ userId }: { userId: string }) {
       (data) => {
         if (active) setResult({ ...request, data });
       },
-      () => {
-        if (active) setResult(request);
+      (error: unknown) => {
+        if (active) {
+          setResult({
+            ...request,
+            error: error instanceof Error ? error.message : "Unexpected API error",
+          });
+        }
       },
     );
     return () => {
@@ -159,7 +165,10 @@ export function LibraryActivityTimeline({ userId }: { userId: string }) {
           className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-4"
           role="alert"
         >
-          <p className="text-sm">Could not load library activity.</p>
+          <div className="min-w-0 space-y-1">
+            <p className="text-sm font-medium">Could not load library activity.</p>
+            <p className="break-words text-xs text-muted-foreground">{current.error}</p>
+          </div>
           <Button size="sm" variant="outline" onClick={() => setRefresh(refresh + 1)}>
             Retry
           </Button>

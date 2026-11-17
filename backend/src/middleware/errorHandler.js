@@ -14,6 +14,10 @@ function errorHandler(error, req, res, _next) {
     });
   }
 
+  if (statusCode >= 500 && req.method === "POST" && req.path === "/api/progress/library-activity") {
+    console.error("[library.activity] write_failed", { name: error.name, statusCode });
+  }
+
   const payload = {
     message: statusCode === 500 ? "Internal server error" : error.message,
   };

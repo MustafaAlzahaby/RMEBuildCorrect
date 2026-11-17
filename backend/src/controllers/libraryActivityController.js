@@ -33,6 +33,7 @@ const getLibraryActivity = asyncHandler(async (req, res) => {
     ]),
   ]);
 
+  res.set("Cache-Control", "private, no-store");
   res.json({
     events: items.slice(0, pageSize),
     counts: Object.fromEntries(counts.map(({ _id, count }) => [_id, count])),

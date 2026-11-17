@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { footingContext, trackLibraryActivity } from "@/api/libraryActivity";
+import { fileOpenHandlers, footingContext, trackLibraryActivity } from "@/api/libraryActivity";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -52,7 +52,7 @@ export function ConcreteFootingReferencesPage() {
             <Button asChild variant="outline">
               <a
                 href={pdf.url}
-                onClick={() => trackLibraryActivity("file", pdf.filename, context)}
+                {...fileOpenHandlers(pdf.filename, context)}
                 target="_blank"
                 rel="noopener noreferrer"
               >

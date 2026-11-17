@@ -62,7 +62,7 @@ async function uploadFile(file, folder) {
   return key;
 }
 
-async function getPresignedUrl(key) {
+async function getPresignedUrl(key, responseContentDisposition) {
   if (!key) {
     return "";
   }
@@ -83,11 +83,21 @@ async function getPresignedUrl(key) {
   const command = new GetObjectCommand({
     Bucket: env.AWS_S3_BUCKET,
     Key: key,
+    ResponseContentDisposition: responseContentDisposition,
   });
 
   return getSignedUrl(getS3Client(), command, {
     expiresIn: env.S3_SIGNED_URL_EXPIRES_SECONDS,
   });
+}
+
+async function sendPdfDownload(res, key) {
+  if (key.startsWith("local/")) {
+    return res.download(key.slice("local/".length), "guide.pdf", { root: localUploadRoot });
+  }
+
+  const url = await getPresignedUrl(key, 'attachment; filename="guide.pdf"');
+  return res.redirect(url);
 }
 
 async function signLessonAssets(lesson) {
@@ -100,4 +110,4 @@ async function signLessonAssets(lesson) {
   return data;
 }
 
-module.exports = { getPresignedUrl, signLessonAssets, uploadFile };
+module.exports = { getPresignedUrl, sendPdfDownload, signLessonAssets, uploadFile };

@@ -1,3 +1,4 @@
+import type { MouseEvent } from "react";
 import { apiRequest } from "./client";
 
 export type ActivityKind = "category" | "subcategory" | "workspace" | "tab" | "file" | "download";
@@ -19,15 +20,31 @@ export function trackLibraryActivity(kind: ActivityKind, title: string, context?
     method: "POST",
     body: JSON.stringify({ kind, title: title.slice(0, 300), context: context?.slice(0, 600) }),
     keepalive: true,
-  }).catch(() => {
-    // Activity recording must not interrupt navigation or file actions.
+  }).catch((error: unknown) => {
+    console.warn("Library activity could not be recorded", kind, error);
   });
 }
 
-export function getLibraryActivity(userId: string, page: number, kind: ActivityKind | "") {
+export function fileOpenHandlers(title: string, context?: string) {
+  const record = () => trackLibraryActivity("file", title, context);
+  return {
+    onClick: record,
+    onAuxClick: (event: MouseEvent<HTMLAnchorElement>) => {
+      if (event.button === 1) record();
+    },
+  };
+}
+
+export async function getLibraryActivity(userId: string, page: number, kind: ActivityKind | "") {
   const query = new URLSearchParams({ page: String(page) });
   if (kind) query.set("kind", kind);
-  return apiRequest<ActivityPage>(`/users/${userId}/library-activity?${query}`);
+  const data = await apiRequest<ActivityPage>(`/users/${userId}/library-activity?${query}`, {
+    cache: "no-store",
+  });
+  if (!Array.isArray(data?.events) || !data.counts || typeof data.hasNext !== "boolean") {
+    throw new Error("The API did not return a library activity timeline.");
+  }
+  return data;
 }
 
 export const footingTitle = "Plain Concrete (PC) Footings & Raft";

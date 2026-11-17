@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const Category = require("../models/Category");
 const Lesson = require("../models/Lesson");
+const LibraryActivity = require("../models/LibraryActivity");
 const LessonProgress = require("../models/LessonProgress");
 const { AppError } = require("../utils/AppError");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { createSlug } = require("../utils/slug");
-const { signLessonAssets, uploadFile } = require("../services/s3Service");
+const { sendPdfDownload, signLessonAssets, uploadFile } = require("../services/s3Service");
 
 async function resolveCategoryFilter(value) {
   if (!value) {
@@ -84,6 +85,28 @@ const getLesson = asyncHandler(async (req, res) => {
   res.json({ lesson: await signLessonAssets(lesson) });
 });
 
+const downloadLessonPdf = asyncHandler(async (req, res) => {
+  const lesson = await Lesson.findById(req.params.id)
+    .select("title pdfUrl categoryId")
+    .populate("categoryId", "name");
+  if (!lesson?.pdfUrl) {
+    throw new AppError("Guide PDF not found", 404);
+  }
+
+  const context = [lesson.categoryId?.name, lesson.title].filter(Boolean).join(" / ");
+  await LibraryActivity.create({
+    userId: req.user._id,
+    kind: "download",
+    title: "Guide PDF",
+    context: context.slice(0, 600),
+  }).catch((error) => {
+    console.error("[library.activity] download_write_failed", { name: error.name });
+  });
+
+  res.set("Cache-Control", "private, no-store");
+  await sendPdfDownload(res, lesson.pdfUrl);
+});
+
 const createLesson = asyncHandler(async (req, res) => {
   const patch = pickLessonFields(req.body);
   patch.slug = patch.slug ? createSlug(patch.slug) : createSlug(patch.title);
@@ -141,6 +164,7 @@ const deleteLesson = asyncHandler(async (req, res) => {
 module.exports = {
   createLesson,
   deleteLesson,
+  downloadLessonPdf,
   getLesson,
   listLessons,
   updateLesson,
