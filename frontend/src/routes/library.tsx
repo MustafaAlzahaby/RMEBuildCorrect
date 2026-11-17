@@ -4,7 +4,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { LessonCard } from "@/components/LessonCard";
 import { GuideCategoryBrowser } from "@/components/GuideCategoryBrowser";
-import { trackLibraryActivity } from "@/api/libraryActivity";
+import { recordDivisionOpen, trackLibraryActivity } from "@/api/libraryActivity";
 import { listCategories } from "@/api/categories";
 import { listLessons } from "@/api/lessons";
 import { isDivision, lessonBelongsToCategory, parentOf } from "@/lib/categories";
@@ -50,11 +50,7 @@ export function LibraryPage() {
       const previous = previousSelection.current;
 
       if (division && previous.division !== division.id) {
-        trackLibraryActivity(
-          "category",
-          division.name,
-          division.code ? `Division ${division.code}` : undefined,
-        );
+        recordDivisionOpen(division);
       }
       if (selected && !isDivision(selected) && selected.id !== previous.category) {
         trackLibraryActivity(
@@ -129,6 +125,9 @@ export function LibraryPage() {
           categories={categories}
           guides={guides}
           value={category}
+          onDivisionOpen={(division) => {
+            previousSelection.current = { category: division.id, division: division.id };
+          }}
           onChange={(value) => updateFilter("category", value)}
         />
       )}

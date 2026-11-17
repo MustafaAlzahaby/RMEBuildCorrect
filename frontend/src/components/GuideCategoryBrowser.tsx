@@ -7,6 +7,7 @@ import {
   fileOpenHandlers,
   footingContext,
   footingTitle,
+  recordDivisionOpen,
   trackLibraryActivity,
 } from "@/api/libraryActivity";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -379,11 +380,13 @@ export function GuideCategoryBrowser({
   guides,
   value,
   onChange,
+  onDivisionOpen,
 }: {
   categories: Category[];
   guides: Lesson[];
   value: string;
   onChange: (value: string) => void;
+  onDivisionOpen?: (division: Category) => void;
 }) {
   const active = categories.find((category) => category.id === value);
   const expandedDivision = active && (isDivision(active) ? active : parentOf(categories, active));
@@ -399,7 +402,14 @@ export function GuideCategoryBrowser({
         type="single"
         collapsible
         value={expandedDivision?.id ?? ""}
-        onValueChange={onChange}
+        onValueChange={(divisionId) => {
+          const division = divisions.find(({ id }) => id === divisionId);
+          if (division) {
+            recordDivisionOpen(division);
+            onDivisionOpen?.(division);
+          }
+          onChange(divisionId);
+        }}
         className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 xl:grid-cols-3"
       >
         {divisions.map((division, index) => {

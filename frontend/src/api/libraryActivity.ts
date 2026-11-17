@@ -25,6 +25,14 @@ export function trackLibraryActivity(kind: ActivityKind, title: string, context?
   });
 }
 
+export function recordDivisionOpen(division: { name: string; code?: string }) {
+  trackLibraryActivity(
+    "category",
+    division.name,
+    division.code ? `Division ${division.code}` : undefined,
+  );
+}
+
 export function fileOpenHandlers(title: string, context?: string) {
   const record = () => trackLibraryActivity("file", title, context);
   return {
